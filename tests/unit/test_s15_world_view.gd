@@ -99,4 +99,7 @@ func test_sun_is_above_horizon_at_noon_and_below_at_night() -> void:
 
 	view.call("set_time_of_day", 0.0)
 	var midnight_down: Vector3 = -sun.transform.basis.z
-	assert_float(midnight_down.y).is_greater(0.0)
+	# S15b: the sun elevation is clamped to a small positive minimum, so at midnight the light still travels
+	# downward, only at a shallow angle.
+	assert_float(midnight_down.y).is_less(0.0)
+	assert_float(midnight_down.y).is_greater(-0.2)
