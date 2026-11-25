@@ -3,7 +3,8 @@ extends GdUnitTestSuite
 ## Mode short shows the translation only and closes after 3 s. Mode off closes at once. Text follows the locale.
 
 const CARD_SCRIPT: String = "res://ui/shloka_card.gd"
-const SHLOKA_ID: String = "yk_nala_son_of_vishwakarma"
+## First shloka in this game's data, so the suite is shared unchanged between games.
+var SHLOKA_ID: String = str(((JSON.parse_string(FileAccess.get_file_as_string("res://data/shlokas.json")) as Dictionary)["shlokas"] as Array)[0]["id"])
 
 var _card: ShlokaCard = null
 
@@ -89,12 +90,14 @@ func test_devanagari_is_drawn_in_gold() -> void:
 
 
 func test_translation_follows_the_locale() -> void:
+	var entry: Dictionary = Shlokas.get_shloka(StringName(SHLOKA_ID))
+	var tr_map: Dictionary = entry["translation"] as Dictionary
 	TranslationServer.set_locale("en")
 	_card.show_shloka(StringName(SHLOKA_ID))
-	assert_str(_card.translation_text()).contains("Nala")
+	assert_str(_card.translation_text()).is_equal(str(tr_map["en"]))
 	TranslationServer.set_locale("hi")
 	_card.show_shloka(StringName(SHLOKA_ID))
-	assert_str(_card.translation_text()).contains("नल")
+	assert_str(_card.translation_text()).is_equal(str(tr_map["hi"]))
 
 
 func test_unknown_shloka_id_opens_without_crashing() -> void:
