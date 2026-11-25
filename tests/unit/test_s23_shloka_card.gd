@@ -102,3 +102,18 @@ func test_unknown_shloka_id_opens_without_crashing() -> void:
 	_card.show_shloka(&"no_such_shloka")
 	assert_bool(_card.is_open()).is_true()
 	assert_str(_card.devanagari_text()).is_empty()
+
+
+func test_open_card_follows_a_language_switch_when_refreshed() -> void:
+	TranslationServer.set_locale("en")
+	_card.mode = ShlokaCard.MODE_SHORT
+	_card.show_shloka(StringName(SHLOKA_ID))
+	var en_text: String = _card.translation_text()
+	var entry: Dictionary = Shlokas.get_shloka(SHLOKA_ID)
+	var table: Dictionary = entry.get("translation", {}) as Dictionary
+	var hi_text: String = str(table.get("hi", ""))
+	TranslationServer.set_locale("hi")
+	_card.refresh_language()
+	var expected: String = hi_text if not hi_text.strip_edges().is_empty() else en_text
+	assert_str(_card.translation_text()).is_equal(expected)
+	assert_bool(_card.is_open()).is_true()

@@ -7,6 +7,7 @@ extends Control
 ## gamepad navigable. A shloka step opens a ShlokaCard and the dialogue resumes when the card closes.
 ## play("file") starts a file; play("file#node") starts at a node. finished(file_id) is emitted when the dialogue ends.
 ## While is_playing() is true the caller should leave world input alone, because the panel passes clicks through.
+## The box fills its parent (full rect anchors), so it can be added under any sized Control or CanvasLayer child.
 
 signal finished(file_id: StringName)
 signal choice_selected(index: int)
@@ -44,13 +45,19 @@ var _playing: bool = false
 var _card_open: bool = false
 var _file_id: StringName = &""
 var _choices_dirty: bool = false
+var _line_seen: bool = false
 var _entry_path: String = ""
 
 
 func _ready() -> void:
+	set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	_build()
 	visible = false
+
+
+func _exit_tree() -> void:
+	_remove_entry()
 
 
 func _process(delta: float) -> void:
@@ -89,6 +96,8 @@ func play(file_id: StringName, node_id: StringName = &"") -> Error:
 	_playing = true
 	visible = true
 	var err: Error = _runner.start(start_id)
+	# start() has read the whole file into memory, so the "file#node" copy is no longer needed.
+	_remove_entry()
 	if err != OK:
 		push_warning("DialogueBox: could not start '%s' (error %d)" % [str(start_id), err])
 		_playing = false
@@ -258,6 +267,7 @@ func _reset() -> void:
 	_accum = 0.0
 	_card_open = false
 	_choices_dirty = true
+	_line_seen = false
 	if _card != null:
 		_card.visible = false
 	if _panel != null:
@@ -312,11 +322,13 @@ func _remove_entry() -> void:
 
 func _advance_runner() -> void:
 	_choices_dirty = true
+	_line_seen = false
 	_runner.advance()
 	_sync()
 
 
 func _on_line_shown(speaker: StringName, text: String) -> void:
+	_line_seen = true
 	var speaker_text: String = str(speaker)
 	_speaker_label.text = "" if speaker_text.is_empty() else tr(SPEAKER_KEY_PREFIX + speaker_text.to_upper())
 	_clusters = split_graphemes(text)
@@ -359,6 +371,7 @@ func _on_choice_pressed(index: int) -> void:
 		return
 	_clear_choices()
 	_choices_dirty = true
+	_line_seen = false
 	choice_selected.emit(index)
 	_runner.choose(index)
 	_sync()
@@ -372,8 +385,19 @@ func _sync() -> void:
 			_clear_choices()
 		return
 	if _choices_dirty:
+		# A choice node with no text_key shows no line, so the previous line must not stay on screen above it.
+		if not _line_seen:
+			_clear_text()
 		_build_choices()
 	_set_buttons_visible(not is_typing())
+
+
+func _clear_text() -> void:
+	_clusters = []
+	_revealed = 0
+	_accum = 0.0
+	_speaker_label.text = ""
+	_update_text()
 
 
 func _build_choices() -> void:

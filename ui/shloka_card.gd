@@ -33,6 +33,7 @@ var mode: StringName = MODE_ON:
 var _id: StringName = &""
 var _open: bool = false
 var _elapsed: float = 0.0
+var _entry: Dictionary = {}
 var _devanagari: String = ""
 var _iast: String = ""
 var _translation: String = ""
@@ -46,6 +47,9 @@ var _reference_label: Label = null
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
 	set_anchors_preset(Control.PRESET_FULL_RECT)
+	var locale: Node = get_node_or_null(^"/root/Locale")
+	if locale != null and locale.has_signal(&"language_changed"):
+		locale.connect(&"language_changed", _on_language_changed)
 	var shade: ColorRect = ColorRect.new()
 	shade.color = SHADE_COLOR
 	shade.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -60,22 +64,25 @@ func _ready() -> void:
 	column.add_theme_constant_override("separation", 12)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	center.add_child(column)
-	var ui_font: Font = locale_font(self, &"ui")
-	var iast_font: FontVariation = FontVariation.new()
-	iast_font.base_font = ui_font
-	iast_font.variation_transform = Transform2D(Vector2.RIGHT, Vector2(ITALIC_SKEW, 1.0), Vector2.ZERO)
 	_devanagari_label = _make_label(locale_font(self, &"shloka"), DEVANAGARI_SIZE, Palette.GOLD)
-	_iast_label = _make_label(iast_font, IAST_SIZE, Palette.MOON)
-	_translation_label = _make_label(ui_font, TRANSLATION_SIZE, Palette.MOON)
+	_iast_label = _make_label(locale_font(self, &"ui"), IAST_SIZE, Palette.MOON)
+	_translation_label = _make_label(locale_font(self, &"ui"), TRANSLATION_SIZE, Palette.MOON)
 	_translation_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_translation_label.custom_minimum_size = Vector2(TRANSLATION_WIDTH, 0.0)
-	_reference_label = _make_label(ui_font, REFERENCE_SIZE, Palette.STONE)
+	_reference_label = _make_label(locale_font(self, &"ui"), REFERENCE_SIZE, Palette.STONE)
 	column.add_child(_devanagari_label)
 	column.add_child(_iast_label)
 	column.add_child(_translation_label)
 	column.add_child(_reference_label)
+	_apply_fonts()
 	visible = _open
 	_refresh()
+
+
+func _exit_tree() -> void:
+	var locale: Node = get_node_or_null(^"/root/Locale")
+	if locale != null and locale.is_connected(&"language_changed", _on_language_changed):
+		locale.disconnect(&"language_changed", _on_language_changed)
 
 
 func _process(delta: float) -> void:
@@ -92,15 +99,42 @@ func show_shloka(id: StringName) -> void:
 	_id = id
 	_open = true
 	_elapsed = 0.0
-	var entry: Dictionary = Shlokas.get_shloka(str(id))
-	_devanagari = str(entry.get("devanagari", ""))
-	_iast = str(entry.get("iast", ""))
-	_reference = str(entry.get("ref", ""))
-	_translation = _translation_of(entry)
+	_entry = Shlokas.get_shloka(str(id))
+	_devanagari = str(_entry.get("devanagari", ""))
+	_iast = str(_entry.get("iast", ""))
+	_reference = str(_entry.get("ref", ""))
+	_translation = _translation_of(_entry)
 	_refresh()
 	visible = true
 	if mode == MODE_OFF:
 		_close()
+
+
+## Re-reads the translation and fonts for the current language. Called when the Locale language changes, so an open
+## card follows a language switch.
+func refresh_language() -> void:
+	_apply_fonts()
+	if _id.is_empty():
+		return
+	_translation = _translation_of(_entry)
+	_refresh()
+
+
+func _on_language_changed(_code: StringName) -> void:
+	refresh_language()
+
+
+func _apply_fonts() -> void:
+	if _devanagari_label == null:
+		return
+	var ui_font: Font = locale_font(self, &"ui")
+	var iast_font: FontVariation = FontVariation.new()
+	iast_font.base_font = ui_font
+	iast_font.variation_transform = Transform2D(Vector2.RIGHT, Vector2(ITALIC_SKEW, 1.0), Vector2.ZERO)
+	_devanagari_label.add_theme_font_override("font", locale_font(self, &"shloka"))
+	_iast_label.add_theme_font_override("font", iast_font)
+	_translation_label.add_theme_font_override("font", ui_font)
+	_reference_label.add_theme_font_override("font", ui_font)
 
 
 ## Moves the card's clock on. Mode on has no timeout; mode short closes after SHORT_SECONDS.

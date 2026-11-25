@@ -17,6 +17,7 @@ var _translation: Translation = null
 func before_test() -> void:
 	TranslationServer.set_locale("en")
 	_make_fixture_dir()
+	_remove_stale_entries()
 	_write_fixture(MAIN_FILE, "n1", {
 		"n1": {"speaker": "rama", "text_key": "S23_LINE_1", "next": "n2"},
 		"n2": {"speaker": "narrator", "text_key": "S23_LINE_2",
@@ -46,6 +47,25 @@ func after_test() -> void:
 	TranslationServer.remove_translation(_translation)
 	TranslationServer.set_locale("en")
 	_remove_fixture_dir()
+
+
+## Deletes entry copies left behind by earlier runs (before entries were removed right after start).
+func _remove_stale_entries() -> void:
+	for name: String in _entry_cache_files(MAIN_FILE + "@"):
+		DirAccess.remove_absolute(DialogueBox.ENTRY_CACHE_DIR + name)
+
+
+func _entry_cache_files(prefix: String) -> Array[String]:
+	var found: Array[String] = []
+	var dir: DirAccess = DirAccess.open(DialogueBox.ENTRY_CACHE_DIR)
+	if dir == null:
+		return found
+	for name: String in dir.get_files():
+		if name.begins_with(prefix):
+			found.append(name)
+	return found
+
+
 
 
 func _make_fixture_dir() -> void:
@@ -157,6 +177,57 @@ func test_play_at_a_node_reference_starts_there() -> void:
 	_box.play(StringName(MAIN_FILE + "#n5"))
 	_box.reveal_all()
 	assert_str(_box.revealed_text()).is_equal("S23_LINE_5")
+
+
+func test_node_start_leaves_no_entry_copy_behind_even_mid_dialogue() -> void:
+	_box.play(StringName(MAIN_FILE + "#n1"))
+	assert_bool(_box.is_playing()).is_true()
+	assert_array(_entry_cache_files(MAIN_FILE + "@")).has_size(0)
+
+
+func test_removing_the_box_mid_dialogue_removes_the_entry_copy() -> void:
+	var box: DialogueBox = (load(BOX_SCRIPT) as GDScript).new() as DialogueBox
+	box.dialogue_dir = FIXTURE_DIR
+	box.shloka_mode = ShlokaCard.MODE_OFF
+	add_child(box)
+	box.play(StringName(MAIN_FILE + "#n1"))
+	assert_bool(box.is_playing()).is_true()
+	remove_child(box)
+	box.free()
+	assert_array(_entry_cache_files(MAIN_FILE + "@")).has_size(0)
+
+
+func test_box_fills_a_sized_parent_and_the_panel_has_width() -> void:
+	var host: Control = Control.new()
+	host.size = Vector2(800.0, 600.0)
+	add_child(host)
+	auto_free(host)
+	var box: DialogueBox = (load(BOX_SCRIPT) as GDScript).new() as DialogueBox
+	box.visible = true
+	host.add_child(box)
+	await await_idle_frame()
+	assert_float(box.size.x).is_equal_approx(800.0, 0.5)
+	var panel: PanelContainer = null
+	for child: Node in box.get_children():
+		if child is PanelContainer:
+			panel = child as PanelContainer
+	assert_object(panel).is_not_null()
+	assert_float((panel as PanelContainer).size.x).is_greater(0.0)
+
+
+func test_choice_node_without_text_clears_the_previous_line() -> void:
+	_write_fixture("s23_bare", "n1", {
+		"n1": {"speaker": "rama", "text_key": "S23_LINE_1", "next": "n2"},
+		"n2": {"choices": [{"text_key": "S23_CH_A", "next": null, "flags": {}, "smarana": 0}]},
+	})
+	_box.chars_per_second = 1000.0
+	_box.play(&"s23_bare")
+	_box.reveal_all()
+	assert_str(_box.revealed_text()).is_equal("S23_LINE_1")
+	_box.handle_input_event(_accept_event())
+	assert_bool(_box.get_runner().waiting_for_choice()).is_true()
+	assert_str(_box.revealed_text()).is_equal("")
+	assert_bool(_box.is_typing()).is_false()
 
 
 func test_finishing_the_dialogue_emits_finished_and_hides() -> void:
