@@ -1,0 +1,540 @@
+{
+ "day": 4,
+ "commands": [
+  {
+   "tick": 0,
+   "type": "build_station",
+   "args": {
+    "kind": "quarry",
+    "pos": [
+     -24,
+     -12
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "build_station",
+   "args": {
+    "kind": "lekhan",
+    "pos": [
+     -12,
+     -6
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "build_station",
+   "args": {
+    "kind": "forest",
+    "pos": [
+     -16,
+     10
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "build_station",
+   "args": {
+    "kind": "ropeworks",
+    "pos": [
+     -8,
+     6
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "assign_crews",
+   "args": {
+    "role": "cutter",
+    "site": "quarry_1",
+    "crews": 3
+   }
+  },
+  {
+   "tick": 0,
+   "type": "assign_crews",
+   "args": {
+    "role": "lumberjack",
+    "site": "forest_3",
+    "crews": 2
+   }
+  },
+  {
+   "tick": 0,
+   "type": "assign_crews",
+   "args": {
+    "role": "lasher",
+    "site": "ropeworks_4",
+    "crews": 1
+   }
+  },
+  {
+   "tick": 0,
+   "type": "assign_crews",
+   "args": {
+    "role": "scribe",
+    "site": "lekhan_2",
+    "crews": 2
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "q_l",
+    "from": "quarry_1",
+    "to": "lekhan_2",
+    "kind": "stone",
+    "haulers": 10,
+    "points": [
+     [
+      -24,
+      -12
+     ],
+     [
+      -12,
+      -6
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "q_l1",
+    "from": "quarry_1",
+    "to": "lekhan_2",
+    "kind": "stone",
+    "haulers": 10,
+    "points": [
+     [
+      -24,
+      -12
+     ],
+     [
+      -12,
+      -6
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "q_l2",
+    "from": "quarry_1",
+    "to": "lekhan_2",
+    "kind": "stone",
+    "haulers": 10,
+    "points": [
+     [
+      -24,
+      -12
+     ],
+     [
+      -12,
+      -6
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "l_h",
+    "from": "lekhan_2",
+    "to": "head",
+    "kind": "inscribed_stone",
+    "haulers": 10,
+    "points": [
+     [
+      -12,
+      -6
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "l_h1",
+    "from": "lekhan_2",
+    "to": "head",
+    "kind": "inscribed_stone",
+    "haulers": 10,
+    "points": [
+     [
+      -12,
+      -6
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "l_h2",
+    "from": "lekhan_2",
+    "to": "head",
+    "kind": "inscribed_stone",
+    "haulers": 10,
+    "points": [
+     [
+      -12,
+      -6
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "f_h",
+    "from": "forest_3",
+    "to": "head",
+    "kind": "timber",
+    "haulers": 20,
+    "points": [
+     [
+      -16,
+      10
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "f_h1",
+    "from": "forest_3",
+    "to": "head",
+    "kind": "timber",
+    "haulers": 10,
+    "points": [
+     [
+      -16,
+      10
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "f_r",
+    "from": "forest_3",
+    "to": "ropeworks_4",
+    "kind": "timber",
+    "haulers": 10,
+    "points": [
+     [
+      -16,
+      10
+     ],
+     [
+      -8,
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "r_h",
+    "from": "ropeworks_4",
+    "to": "head",
+    "kind": "rope",
+    "haulers": 10,
+    "points": [
+     [
+      -8,
+      6
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "place_measuring_line",
+   "args": {
+    "deg": 0.0
+   }
+  },
+  {
+   "tick": 900,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 1050,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 1200,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 1350,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 1500,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 1650,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 1800,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 1950,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 2100,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 2250,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 2400,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 2550,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 2700,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 2850,
+   "type": "ring_gong",
+   "args": {
+    "id": 1
+   }
+  },
+  {
+   "tick": 3000,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 3200,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 3400,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 3600,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 3800,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 4000,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 4200,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 4400,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 4600,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 4800,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 5000,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 5200,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 5400,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 5600,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 5800,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 6000,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 6200,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 6400,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 6600,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  },
+  {
+   "tick": 6800,
+   "type": "ring_gong",
+   "args": {
+    "id": 2
+   }
+  }
+ ]
+}

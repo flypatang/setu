@@ -1,0 +1,302 @@
+{
+ "day": 2,
+ "commands": [
+  {
+   "tick": 0,
+   "type": "build_station",
+   "args": {
+    "kind": "quarry",
+    "pos": [
+     -24,
+     -12
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "build_station",
+   "args": {
+    "kind": "lekhan",
+    "pos": [
+     -12,
+     -6
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "build_station",
+   "args": {
+    "kind": "forest",
+    "pos": [
+     -16,
+     10
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "build_station",
+   "args": {
+    "kind": "ropeworks",
+    "pos": [
+     -8,
+     6
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "assign_crews",
+   "args": {
+    "role": "cutter",
+    "site": "quarry_1",
+    "crews": 3
+   }
+  },
+  {
+   "tick": 0,
+   "type": "assign_crews",
+   "args": {
+    "role": "lumberjack",
+    "site": "forest_3",
+    "crews": 2
+   }
+  },
+  {
+   "tick": 0,
+   "type": "assign_crews",
+   "args": {
+    "role": "lasher",
+    "site": "ropeworks_4",
+    "crews": 1
+   }
+  },
+  {
+   "tick": 0,
+   "type": "assign_crews",
+   "args": {
+    "role": "scribe",
+    "site": "lekhan_2",
+    "crews": 2
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "q_l",
+    "from": "quarry_1",
+    "to": "lekhan_2",
+    "kind": "stone",
+    "haulers": 10,
+    "points": [
+     [
+      -24,
+      -12
+     ],
+     [
+      -12,
+      -6
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "q_l1",
+    "from": "quarry_1",
+    "to": "lekhan_2",
+    "kind": "stone",
+    "haulers": 10,
+    "points": [
+     [
+      -24,
+      -12
+     ],
+     [
+      -12,
+      -6
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "q_l2",
+    "from": "quarry_1",
+    "to": "lekhan_2",
+    "kind": "stone",
+    "haulers": 10,
+    "points": [
+     [
+      -24,
+      -12
+     ],
+     [
+      -12,
+      -6
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "l_h",
+    "from": "lekhan_2",
+    "to": "head",
+    "kind": "inscribed_stone",
+    "haulers": 10,
+    "points": [
+     [
+      -12,
+      -6
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "l_h1",
+    "from": "lekhan_2",
+    "to": "head",
+    "kind": "inscribed_stone",
+    "haulers": 10,
+    "points": [
+     [
+      -12,
+      -6
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "l_h2",
+    "from": "lekhan_2",
+    "to": "head",
+    "kind": "inscribed_stone",
+    "haulers": 10,
+    "points": [
+     [
+      -12,
+      -6
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "f_h",
+    "from": "forest_3",
+    "to": "head",
+    "kind": "timber",
+    "haulers": 20,
+    "points": [
+     [
+      -16,
+      10
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "f_h1",
+    "from": "forest_3",
+    "to": "head",
+    "kind": "timber",
+    "haulers": 10,
+    "points": [
+     [
+      -16,
+      10
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "f_r",
+    "from": "forest_3",
+    "to": "ropeworks_4",
+    "kind": "timber",
+    "haulers": 10,
+    "points": [
+     [
+      -16,
+      10
+     ],
+     [
+      -8,
+      6
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "r_h",
+    "from": "ropeworks_4",
+    "to": "head",
+    "kind": "rope",
+    "haulers": 10,
+    "points": [
+     [
+      -8,
+      6
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "place_measuring_line",
+   "args": {
+    "deg": 0.0
+   }
+  }
+ ]
+}
