@@ -55,7 +55,7 @@ hauling and morale. Folk vignette: as boys, both were blessed (or playfully curs
 | Day 4 | 4 | 22 (77 total) | **Sea creatures** (makara, giant fish): sound gongs and use conch signals | A pod of makaras |
 | Day 5 | 5 | 23 (100 total) | Everything; time pressure; Rama's arrival adds morale | A great storm at the finish |
 | Vignette | between Days 2 and 3 | — | **The squirrel:** play a short scene as a little squirrel rolling in sand and shaking it onto the bridge. Rama strokes its back, leaving three stripes. | — |
-| Free Build | — | — | A sandbox with all tools and no timer | Hazards you can toggle |
+| Free Build *(post-launch update)* | — | — | A sandbox with all tools and no timer | Hazards you can toggle |
 
 Each "day" is about 8–12 minutes of game time and is scored for length, alignment, material efficiency and morale.
 A day ends when the sun sets (the timer). Unfinished length carries over and the next target gets harder, so the
@@ -147,6 +147,7 @@ wall time, and the same seed with the same inputs must produce an identical brid
 |---|---|
 | 2026-11-26 | Combine Valmiki and the folk tradition: stones inscribed with "राम" float, and this is shown prominently; the squirrel is a vignette (§2, §3, §4.1). |
 | 2026-11-26 | Nala and Nila both appear as foremen (§2). |
+| 2026-11-26 | Free Build is left out of the first release and comes as a free update later. |
 
 ## 12. Open questions for the owner
-1. Free Build mode (§3): should it be in the first release, or added in a later update?
+None at the moment.
