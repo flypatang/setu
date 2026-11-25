@@ -341,7 +341,7 @@ func _assign_allowed(role: String, site: String) -> bool:
 	else:
 		return true
 	if not _pile_pos.has(site):
-		return true
+		return true  # unknown site: intentionally left to crews.assign to reject
 	return _near_node(kind, _pile_pos[site] as Vector2)
 
 

@@ -74,3 +74,24 @@ func test_lekhan_at_exactly_shore_limit_rejected() -> void:
 	assert_float(DayFlow.SHORE_MAX_X).is_equal(0.0)
 	assert_bool(_station(f, "lekhan", DayFlow.SHORE_MAX_X, 3.0)).is_false()
 	assert_bool(_station(f, "lekhan", -0.1, 3.0)).is_true()
+
+
+func test_quarry_exactly_15m_from_node_accepted() -> void:
+	var f: DayFlow = _flow()
+	assert_bool(_station(f, "quarry", -60.0, -15.0)).is_true()
+
+
+func test_quarry_just_over_15m_from_node_rejected() -> void:
+	var f: DayFlow = _flow()
+	assert_bool(_station(f, "quarry", -60.0, -14.9)).is_false()
+
+
+func test_assign_cutter_to_forest_site_rejected() -> void:
+	var f: DayFlow = _flow()
+	assert_bool(f.apply_command({"type": "assign_crews", "args": {"role": "cutter", "site": "forest", "crews": 1}})).is_false()
+
+
+func test_assign_cutter_boundary_15m_and_over() -> void:
+	var f: DayFlow = _flow()
+	assert_bool(_station(f, "quarry", -60.0, -15.0)).is_true()
+	assert_bool(f.apply_command({"type": "assign_crews", "args": {"role": "cutter", "site": "quarry_1", "crews": 1}})).is_true()
