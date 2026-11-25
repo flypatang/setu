@@ -3,8 +3,11 @@ extends Node3D
 ## Bridge meshes, one group per section (DESIGN §9, S14).
 ## Reads the Bridge simulation and never writes to it. Each section shows its foundation stones
 ## (WET_STONE, each topped with a Rama glyph), its timber deck (BARK) and its rope lashings (ROPE).
-## Broken sections drift away along +z and sink; blessed sections play a short gold shimmer.
-## Only sections whose visible state changed are rebuilt.
+## Broken sections drift away along +z and sink, then are freed; any shimmer over them is removed too.
+## Blessed sections play a one-off gold shimmer (once per section); the shimmer node is freed when it ends.
+## Only sections whose visible state changed are rebuilt. A section rebuilt after a break (for example
+## from a restored save) gets a fresh root while its old drifting root finishes its tween and is freed.
+## Tweens are bound to the view or to the node they animate, so freeing the view mid-tween is safe.
 
 const SECTION_LENGTH: float = 1.0
 const SECTION_CENTER_X: float = 0.5
@@ -25,7 +28,9 @@ const DRIFT_TIME: float = 1.5
 
 var _roots: Dictionary[int, Node3D] = {}
 var _drifting: Dictionary[int, Node3D] = {}
+var _drift_targets: Dictionary[int, Vector3] = {}
 var _shimmers: Dictionary[int, MeshInstance3D] = {}
+var _shimmered: Dictionary[int, bool] = {}
 var _keys: Dictionary[int, String] = {}
 var _rebuilds: int = 0
 var _material: ShaderMaterial
@@ -45,7 +50,7 @@ func sync(bridge: Bridge) -> void:
 			_start_drift(i)
 		else:
 			_build_section(i, s)
-		if s.blessed and not _shimmers.has(i):
+		if s.blessed and not s.broken and not _shimmered.has(i):
 			_start_shimmer(i)
 
 
@@ -76,6 +81,14 @@ func is_drifting(index: int) -> bool:
 	return _drifting.has(index)
 
 
+## The position a drifting section is tweening towards (its start plus DRIFT_OFFSET).
+func get_drift_target(index: int) -> Vector3:
+	if _drift_targets.has(index):
+		return _drift_targets[index]
+	return Vector3.ZERO
+
+
+## True while a shimmer node exists for the section (it exists only during the pulse).
 func has_shimmer(index: int) -> bool:
 	return _shimmers.has(index)
 
@@ -96,9 +109,7 @@ func _build_section(index: int, s: Bridge.Section) -> void:
 		var z: float = (float(k) - 1.5) * STONE_SPACING
 		_add_part(root, MeshKit.box(STONE_SIZE, Palette.WET_STONE),
 			Vector3(SECTION_CENTER_X, STONE_SIZE.y * 0.5, z))
-		# TODO: replace this placeholder with RamaGlyph.mesh (render/rama_glyph.gd) once it is on main.
-		_add_part(root, MeshKit.box(GLYPH_SIZE, Palette.SINDOOR),
-			Vector3(SECTION_CENTER_X, STONE_SIZE.y + GLYPH_SIZE.y * 0.5, z))
+		_add_glyph(root, z)
 	for k: int in s.timber_in:
 		var z: float = (float(k) - 1.0) * PLANK_SPACING
 		_add_part(root, MeshKit.box(PLANK_SIZE, Palette.BARK),
@@ -108,6 +119,14 @@ func _build_section(index: int, s: Bridge.Section) -> void:
 			Vector3(SECTION_CENTER_X, LASHING_HEIGHT, 0.0))
 	_roots[index] = root
 	_rebuilds += 1
+
+
+## The inscribed glyph on top of one foundation stone, at depth z within the section.
+## TODO: replace the placeholder box with RamaGlyph.mesh (render/rama_glyph.gd) once it is on main.
+## That swap belongs here only; the rest of the view does not change.
+func _add_glyph(parent: Node3D, z: float) -> void:
+	_add_part(parent, MeshKit.box(GLYPH_SIZE, Palette.SINDOOR),
+		Vector3(SECTION_CENTER_X, STONE_SIZE.y + GLYPH_SIZE.y * 0.5, z))
 
 
 func _add_part(parent: Node3D, mesh: Mesh, pos: Vector3) -> void:
@@ -134,13 +153,16 @@ func _remove_root(index: int) -> void:
 
 
 ## A broken section leaves its slot, tweens away along +z while sinking, then is freed.
+## Any live shimmer over the section is removed at once so no gold box is left behind.
 func _start_drift(index: int) -> void:
+	_cancel_shimmer(index)
 	if not _roots.has(index):
 		return
 	var root: Node3D = _roots[index]
 	_roots.erase(index)
 	_drifting[index] = root
 	var target: Vector3 = root.position + DRIFT_OFFSET
+	_drift_targets[index] = target
 	var tween: Tween = create_tween()
 	tween.tween_property(root, "position", target, DRIFT_TIME)
 	tween.finished.connect(func() -> void: _finish_drift(index, root))
@@ -149,11 +171,15 @@ func _start_drift(index: int) -> void:
 func _finish_drift(index: int, root: Node3D) -> void:
 	if _drifting.has(index) and _drifting[index] == root:
 		_drifting.erase(index)
+		_drift_targets.erase(index)
 	root.queue_free()
 
 
 ## One-off gold pulse over a blessed section. It sits beside the section, so rebuilds do not touch it.
+## The pulse is started once per section; its tween belongs to the shimmer node, so freeing the node
+## (on completion or on a break) also ends the tween.
 func _start_shimmer(index: int) -> void:
+	_shimmered[index] = true
 	var mat: StandardMaterial3D = StandardMaterial3D.new()
 	mat.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
 	mat.albedo_color = Color(Palette.GOLD, SHIMMER_ALPHA)
@@ -167,6 +193,21 @@ func _start_shimmer(index: int) -> void:
 	mi.position = Vector3(float(index) * SECTION_LENGTH + SECTION_CENTER_X, SHIMMER_SIZE.y * 0.5, 0.0)
 	add_child(mi)
 	_shimmers[index] = mi
-	var tween: Tween = create_tween()
+	var tween: Tween = mi.create_tween()
 	tween.tween_property(mat, "emission_energy_multiplier", SHIMMER_PEAK, SHIMMER_TIME)
 	tween.tween_property(mat, "emission_energy_multiplier", 0.0, SHIMMER_TIME)
+	tween.tween_callback(_finish_shimmer.bind(index, mi))
+
+
+func _finish_shimmer(index: int, mi: MeshInstance3D) -> void:
+	if _shimmers.has(index) and _shimmers[index] == mi:
+		_shimmers.erase(index)
+	mi.queue_free()
+
+
+func _cancel_shimmer(index: int) -> void:
+	if not _shimmers.has(index):
+		return
+	var mi: MeshInstance3D = _shimmers[index]
+	_shimmers.erase(index)
+	mi.queue_free()
