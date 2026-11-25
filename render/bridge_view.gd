@@ -121,12 +121,21 @@ func _build_section(index: int, s: Bridge.Section) -> void:
 	_rebuilds += 1
 
 
-## The inscribed glyph on top of one foundation stone, at depth z within the section.
-## TODO: replace the placeholder box with RamaGlyph.mesh (render/rama_glyph.gd) once it is on main.
-## That swap belongs here only; the rest of the view does not change.
+## The inscribed राम on top of one foundation stone, at depth z within the section. The glyph (RamaGlyph, S13) is
+## built facing +Z, so it is laid flat on the stone's top face, reading upright from the iso camera.
 func _add_glyph(parent: Node3D, z: float) -> void:
-	_add_part(parent, MeshKit.box(GLYPH_SIZE, Palette.SINDOOR),
-		Vector3(SECTION_CENTER_X, STONE_SIZE.y + GLYPH_SIZE.y * 0.5, z))
+	if _glyph_mesh == null:
+		_glyph_mesh = RamaGlyph.mesh(STONE_SIZE.z * 0.8, Palette.SINDOOR)
+	var mi: MeshInstance3D = MeshInstance3D.new()
+	mi.mesh = _glyph_mesh
+	mi.material_override = _flat()
+	mi.position = Vector3(SECTION_CENTER_X, STONE_SIZE.y + 0.01, z)
+	mi.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+	mi.name = "Glyph"
+	parent.add_child(mi)
+
+
+var _glyph_mesh: ArrayMesh = null
 
 
 func _add_part(parent: Node3D, mesh: Mesh, pos: Vector3) -> void:
