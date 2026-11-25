@@ -230,13 +230,13 @@ func test_unknown_option_is_rejected() -> void:
 
 func test_language_switch_updates_labels() -> void:
 	var menu: Menus = _make_menu()
-	assert_str(_button(menu, "BeginButton").text).is_equal("Begin")
+	assert_str(_button(menu, "BeginButton").text).is_equal("New Game")
 	assert_bool(menu.set_option(&"language", "hi")).is_true()
 	assert_str(str(_locale().call("language"))).is_equal("hi")
-	assert_str(_button(menu, "BeginButton").text).is_equal("आरंभ करें")
+	assert_str(_button(menu, "BeginButton").text).is_equal("नया खेल")
 	assert_str(_label(menu, "LanguageLabel").text).is_equal("भाषा")
 	menu.set_option(&"language", "en")
-	assert_str(_button(menu, "BeginButton").text).is_equal("Begin")
+	assert_str(_button(menu, "BeginButton").text).is_equal("New Game")
 	assert_str(_label(menu, "LanguageLabel").text).is_equal("Language")
 
 

@@ -127,7 +127,7 @@ func test_labels_use_translation_keys_and_translate() -> void:
 	var menu: BuildMenu = _make_menu()
 	TranslationServer.set_locale("en")
 	menu.refresh_labels()
-	assert_str(menu.label_text(0)).is_equal("Route")
+	assert_str(menu.label_text(0)).is_equal("Haul route")
 	assert_str(menu.label_text(5)).is_equal("Measuring line")
 
 	TranslationServer.set_locale("hi")
@@ -137,7 +137,7 @@ func test_labels_use_translation_keys_and_translate() -> void:
 		var expected: String = tr("UI_BUILD_" + id.to_upper())
 		assert_str(menu.label_text(i)).is_equal(expected)
 		assert_bool(expected == "UI_BUILD_" + id.to_upper()).is_false()
-	assert_str(menu.label_text(0)).is_equal("मार्ग")
+	assert_str(menu.label_text(0)).is_equal("ढुलाई मार्ग")
 
 
 func test_gamepad_diagonal_and_bottom_directions_select_their_options() -> void:

@@ -38,3 +38,73 @@ SADV_NILA_IDLE,"""Some crews are standing idle. Put them to work!""","""कु�
 SDLG_FIN_001,"On the fifth evening, the last stone marked ""राम"" touches the shore of Lanka. The bridge stretches a hundred yojanas across the sea.","पाँचवें दिन की संध्या को ""राम"" लिखा अंतिम पत्थर लंका के तट को छूता है। सेतु समुद्र पर सौ योजन तक फैला है।"
 SDLG_FIN_002,Gods and sages gather in the sky to see the wonder. The army of Rama begins to cross.,इस अद्भुत दृश्य को देखने देवता और ऋषि आकाश में एकत्र होते हैं। श्रीराम की सेना पार उतरने लगती है।
 SDLG_FIN_003,"""Nala, Nila — and every one of you, down to the smallest — this bridge is your devotion made into stone.""","""नल, नील — और तुम सब, छोटे से छोटे तक — यह सेतु पत्थर में ढली तुम्हारी भक्ति है।"""
+UI_MENU_TITLE,Setu — The Bridge to Lanka,सेतु — लंका तक का पुल
+UI_MENU_BEGIN,New Game,नया खेल
+UI_MENU_SETTINGS,Settings,सेटिंग्स
+UI_MENU_QUIT,Quit,बाहर निकलें
+UI_MENU_PAUSED,Paused,रुका हुआ
+UI_MENU_RESUME,Resume,जारी रखें
+UI_MENU_QUIT_TO_TITLE,Quit to title,मुख्य स्क्रीन पर जाएँ
+UI_MENU_BACK,Back,वापस
+UI_MENU_LANGUAGE,Language,भाषा
+UI_MENU_LANG_EN,English,English
+UI_MENU_LANG_HI,हिन्दी,हिन्दी
+UI_MENU_FPS,Frame rate,फ़्रेम दर
+UI_MENU_FPS_UNLIMITED,Unlimited,असीमित
+UI_MENU_GRAPHICS,Graphics,ग्राफ़िक्स
+UI_MENU_GFX_LOW,Low,निम्न
+UI_MENU_GFX_MEDIUM,Medium,मध्यम
+UI_MENU_GFX_HIGH,High,उच्च
+UI_MENU_VSYNC,VSync,वी-सिंक
+UI_MENU_FULLSCREEN,Fullscreen,पूर्ण स्क्रीन
+UI_MENU_SHLOKA_CARDS,Shloka cards,श्लोक कार्ड
+UI_MENU_SHLOKA_ON,On,चालू
+UI_MENU_SHLOKA_SHORT,Short,संक्षिप्त
+UI_MENU_SHLOKA_OFF,Off,बंद
+UI_MENU_VOLUME_MASTER,Master volume,मुख्य ध्वनि
+UI_MENU_VOLUME_MUSIC,Music volume,संगीत ध्वनि
+UI_MENU_VOLUME_SFX,Effects volume,प्रभाव ध्वनि
+UI_MENU_CONTINUE,Continue,जारी रखें
+UI_HUD_CLOCK,Day %d — sunset in %s,दिन %d — सूर्यास्त में %s
+UI_HUD_LENGTH,Bridge %d / %d m,सेतु %d / %d मी
+UI_HUD_STOCK_STONE,Stone: %d,पत्थर: %d
+UI_HUD_STOCK_INSCRIBED,Inscribed stone: %d,राम-अंकित पत्थर: %d
+UI_HUD_STOCK_TIMBER,Timber: %d,लकड़ी: %d
+UI_HUD_STOCK_ROPE,Rope: %d,रस्सी: %d
+UI_HUD_MORALE,Utsaha (morale): %d,उत्साह: %d
+UI_HUD_PAUSED,Paused,रुका हुआ
+UI_HUD_SPEED,Speed %dx,गति %dx
+UI_HUD_CONTROLS,Right-click: build menu    Space: pause    1/2/3: speed    WASD: pan    Q/E: rotate    Esc: menu,दायाँ क्लिक: निर्माण मेनू    स्पेस: रोकें    1/2/3: गति    WASD: कैमरा    Q/E: घुमाएँ    Esc: मेनू
+UI_SUM_TITLE,Day %d complete,दिन %d पूर्ण
+UI_SUM_LENGTH,Length: %.0f%%,लंबाई: %.0f%%
+UI_SUM_ALIGN,Alignment: %.0f%%,सीध: %.0f%%
+UI_SUM_WASTE,Waste: %.0f%%,बर्बादी: %.0f%%
+UI_SUM_MORALE,Morale: %.0f,उत्साह: %.0f
+UI_SUM_TOTAL,Score: %.0f,अंक: %.0f
+UI_SUM_CARRY,Carried over to the next day: %d m,अगले दिन के लिए शेष: %d मी
+UI_SUM_CONTINUE,Continue,आगे बढ़ें
+UI_BUILD_ROUTE,Haul route,ढुलाई मार्ग
+UI_BUILD_CREWS,Assign crew,दल नियुक्त करें
+UI_BUILD_LEKHAN,Lekhan station,लेखन-स्थल
+UI_BUILD_GONG,Ring gong,घंटा बजाएँ
+UI_BUILD_SHELTER,Shelter,विश्राम-स्थल
+UI_BUILD_MEASURING_LINE,Measuring line,माप की रस्सी
+UI_BUILD_CHANT,Jaya chant,जय-घोष
+UI_PRO_PROMPT,"Nila: put the scribes to work at the Lekhan station, so the first stone can be inscribed with ""राम"".","नील: लेखन-स्थल पर लेखकों को काम पर लगाओ, ताकि पहले पत्थर पर ""राम"" लिखा जा सके।"
+UI_PRO_ASSIGN,Assign scribes,लेखक नियुक्त करें
+UI_CREDITS,"SETU — The Bridge to Lanka
+
+The bridge was built in five days:
+14, 20, 21, 22 and 23 yojanas.
+
+Built by Nala and Nila, and by every vanara, in the name of Rama.
+
+Thank you for playing.","सेतु — लंका तक का पुल
+
+सेतु पाँच दिनों में बना:
+14, 20, 21, 22 और 23 योजन।
+
+नल और नील ने, और हर वानर ने, श्रीराम के नाम पर इसे बनाया।
+
+खेलने के लिए धन्यवाद।"
+UI_CREDITS_BACK,Return to title,मुख्य स्क्रीन पर लौटें

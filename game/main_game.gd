@@ -348,8 +348,8 @@ func is_story_dialogue_pending() -> bool:
 # --- story ---------------------------------------------------------------------
 
 func _prologue_ready() -> void:
-	_prompt.text = _t_or("Nila: put the scribes to work at the Lekhan station, so the first stone can be inscribed with RAMA.")
-	_prompt_button.text = "Assign scribes"
+	_prompt.text = tr("UI_PRO_PROMPT")
+	_prompt_button.text = tr("UI_PRO_ASSIGN")
 	_prompt.visible = true
 	_prompt_button.visible = true
 
@@ -591,7 +591,7 @@ func _build_ui() -> void:
 	_hint.offset_top = -34.0
 	_hint.offset_bottom = -8.0
 	_hint.offset_right = 900.0
-	_hint.text = "Right-click: build menu    Space: pause    1/2/3: speed    WASD: pan    Q/E: rotate    Esc: menu"
+	_hint.text = tr("UI_HUD_CONTROLS")
 	_hint.modulate = Color(1.0, 1.0, 1.0, 0.75)
 	_build_menu = BuildMenu.new()
 	game_layer.add_child(_build_menu)
@@ -641,7 +641,7 @@ func _build_ui() -> void:
 	_menus.quit_to_title_requested.connect(return_to_title)
 	_menus.quit_requested.connect(_on_quit)
 	_continue_button = Button.new()
-	_continue_button.text = "Continue"
+	_continue_button.text = tr("UI_MENU_CONTINUE")
 	_continue_button.anchor_left = 0.5
 	_continue_button.anchor_right = 0.5
 	_continue_button.anchor_top = 1.0
@@ -667,11 +667,11 @@ func _make_credits() -> Control:
 	box.grow_vertical = Control.GROW_DIRECTION_BOTH
 	root.add_child(box)
 	var label: Label = _make_label(box)
-	label.text = CREDITS_TEXT
+	label.text = tr("UI_CREDITS")
 	label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	label.add_theme_font_size_override("font_size", 24)
 	var back: Button = Button.new()
-	back.text = "Return to title"
+	back.text = tr("UI_CREDITS_BACK")
 	back.pressed.connect(finish_credits)
 	_apply_font(back)
 	box.add_child(back)
@@ -698,7 +698,7 @@ func _set_game_ui(on: bool) -> void:
 
 func _update_speed_label() -> void:
 	if _speed_label != null:
-		_speed_label.text = "Paused" if _speed == 0 else "Speed %dx" % _speed
+		_speed_label.text = tr("UI_HUD_PAUSED") if _speed == 0 else tr("UI_HUD_SPEED") % _speed
 
 
 func _make_label(parent: Node) -> Label:
