@@ -1,0 +1,26 @@
+class_name Palette
+extends RefCounted
+## Single source of truth for the colour tokens in DESIGN §6.1. Do not add colours here without updating §6.1.
+
+const SAFFRON: Color = Color("#F28C28")
+const SINDOOR: Color = Color("#D7263D")
+const GOLD: Color = Color("#E9B949")
+const HANUMAN_FUR: Color = Color("#C98B3B")
+const DEEP_OCEAN: Color = Color("#0E3B5C")
+const NIGHT_INDIGO: Color = Color("#1B1B3A")
+const MOON: Color = Color("#DDE6F2")
+const GROVE_GREEN: Color = Color("#2E7D4F")
+const ASHOKA_RED: Color = Color("#E04E39")
+const RAKSHASA_SKIN: Color = Color("#4B3F72")
+const RAKSHASA_ARMOR: Color = Color("#7A1F2B")
+const STONE: Color = Color("#B8A88A")
+const FIRE_CORE: Color = Color("#FFD166")
+const FIRE_EDGE: Color = Color("#EF476F")
+const UI_DARK: Color = Color("#14110F")
+const BARK: Color = Color("#6B4A2B")
+const LEAF_DARK: Color = Color("#1F5A3A")
+const SKY_DUSK: Color = Color("#2A2A44")
+const SHORE_SAND: Color = Color("#E8D3A2")
+const ROPE: Color = Color("#A57C52")
+const WET_STONE: Color = Color("#8A8F87")
+const DAWN_PINK: Color = Color("#F4A6A6")
