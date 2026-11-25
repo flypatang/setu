@@ -12,8 +12,10 @@ const GONG_FACTOR: float = 0.5
 ## Placeholder build costs for a gong tower; tune in data balancing.
 const GONG_ROPE_COST: int = 4
 const GONG_TIMBER_COST: int = 6
+## Creature kinds that can occupy a zone.
+const KINDS: Array[String] = ["makara", "fish"]
 
-## Zone records: {id: int, x_from: float, x_to: float, active_until: int, gongs: int}.
+## Zone records: {id: int, kind: String, x_from: float, x_to: float, active_until: int, gongs: int}.
 var _zones: Array[Dictionary] = []
 var _next_id: int = 1
 var _tick: int = 0
@@ -25,13 +27,17 @@ func step(tick: int) -> void:
 
 
 ## Adds a creature zone over [x_from, x_to) that is active until the given tick (exclusive).
-## Reversed bounds are swapped. Returns the new zone id.
-func add_zone(x_from: float, x_to: float, active_until: int) -> int:
+## Reversed bounds are swapped. kind is "makara" or "fish". Returns the new zone id,
+## or -1 (with an error) for an unknown kind.
+func add_zone(x_from: float, x_to: float, active_until: int, kind: String = "makara") -> int:
+	if not KINDS.has(kind):
+		push_error("Creatures: unknown creature kind '%s'" % kind)
+		return -1
 	var lo: float = minf(x_from, x_to)
 	var hi: float = maxf(x_from, x_to)
 	var id: int = _next_id
 	_next_id += 1
-	_zones.append({"id": id, "x_from": lo, "x_to": hi, "active_until": active_until, "gongs": 0})
+	_zones.append({"id": id, "kind": kind, "x_from": lo, "x_to": hi, "active_until": active_until, "gongs": 0})
 	return id
 
 
@@ -46,6 +52,23 @@ func remaining_ticks(zone_id: int) -> int:
 		return 0
 	var until: int = zone["active_until"] as int
 	return maxi(until - _tick, 0)
+
+
+## Creature kind of the zone, or "" if unknown.
+func zone_kind(zone_id: int) -> String:
+	var zone: Dictionary = _find(zone_id)
+	if zone.is_empty():
+		return ""
+	return zone.get("kind", "makara") as String
+
+
+## Ids of all zones active at the current tick, in creation order.
+func active_zone_ids() -> Array[int]:
+	var ids: Array[int] = []
+	for zone: Dictionary in _zones:
+		if _zone_is_active(zone):
+			ids.append(zone["id"] as int)
+	return ids
 
 
 func gong_count(zone_id: int) -> int:

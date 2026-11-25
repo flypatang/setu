@@ -171,3 +171,27 @@ func test_identical_operations_give_identical_hash() -> void:
 		c.build_gong(zone_id, stock)
 		hashes.append(hash_script.call("hash_state", c.snapshot()) as String)
 	assert_str(hashes[1]).is_equal(hashes[0])
+
+
+func test_makara_and_fish_zones_both_block() -> void:
+	var c: Creatures = _make()
+	var makara_id: int = c.add_zone(0.0, 10.0, 100, "makara")
+	var fish_id: int = c.add_zone(20.0, 30.0, 50, "fish")
+	c.step(10)
+	assert_str(c.zone_kind(makara_id)).is_equal("makara")
+	assert_str(c.zone_kind(fish_id)).is_equal("fish")
+	assert_bool(c.is_blocked_at(5.0)).is_true()
+	assert_bool(c.is_blocked_at(25.0)).is_true()
+	assert_array(c.active_zone_ids()).has_size(2)
+	c.step(50)
+	assert_array(c.active_zone_ids()).contains_exactly([makara_id])
+	assert_bool(c.is_blocked_at(25.0)).is_false()
+	c.step(100)
+	assert_array(c.active_zone_ids()).is_empty()
+
+
+func test_unknown_kind_is_rejected() -> void:
+	var c: Creatures = _make()
+	assert_int(c.add_zone(0.0, 10.0, 100, "kraken")).is_equal(-1)
+	c.step(0)
+	assert_bool(c.is_blocked_at(5.0)).is_false()
