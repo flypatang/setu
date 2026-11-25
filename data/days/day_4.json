@@ -1,0 +1,91 @@
+{
+  "day": 4,
+  "target_yojanas": 22,
+  "day_ticks": 9600,
+  "total_crews": 36,
+  "rama_present": false,
+  "night_from": 7200,
+  "piles": [
+    {
+      "id": "quarry",
+      "role": "cutter",
+      "pos": [
+        -85.0,
+        -45.0
+      ],
+      "stock": {
+        "stone": 10
+      }
+    },
+    {
+      "id": "forest",
+      "role": "lumberjack",
+      "pos": [
+        -75.0,
+        55.0
+      ],
+      "stock": {
+        "timber": 20
+      }
+    },
+    {
+      "id": "ropeworks",
+      "role": "lasher",
+      "pos": [
+        -30.0,
+        20.0
+      ],
+      "stock": {}
+    },
+    {
+      "id": "lekhan",
+      "role": "scribe",
+      "pos": [
+        -30.0,
+        -10.0
+      ],
+      "stock": {}
+    },
+    {
+      "id": "head",
+      "role": "builder",
+      "pos": [
+        0.0,
+        0.0
+      ],
+      "stock": {}
+    }
+  ],
+  "storms": [],
+  "creatures": [
+    {
+      "x_from": 60,
+      "x_to": 90,
+      "active_until": 3600,
+      "kind": "makara"
+    },
+    {
+      "x_from": 140,
+      "x_to": 170,
+      "active_until": 7800,
+      "kind": "fish"
+    }
+  ],
+  "events": [
+    {
+      "tick": 0,
+      "id": "day_start",
+      "dialogue": "day4_intro"
+    },
+    {
+      "tick": 2000,
+      "id": "makara_sighted",
+      "dialogue": "advisor#sadv_nila_idle"
+    },
+    {
+      "tick": 9000,
+      "id": "sunset_near",
+      "dialogue": "advisor#sadv_nala_bless"
+    }
+  ]
+}

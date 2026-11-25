@@ -1,0 +1,91 @@
+{
+  "day": 5,
+  "target_yojanas": 23,
+  "day_ticks": 9600,
+  "total_crews": 40,
+  "rama_present": true,
+  "night_from": -1,
+  "piles": [
+    {
+      "id": "quarry",
+      "role": "cutter",
+      "pos": [
+        -90.0,
+        -40.0
+      ],
+      "stock": {
+        "stone": 10
+      }
+    },
+    {
+      "id": "forest",
+      "role": "lumberjack",
+      "pos": [
+        -80.0,
+        60.0
+      ],
+      "stock": {
+        "timber": 20
+      }
+    },
+    {
+      "id": "ropeworks",
+      "role": "lasher",
+      "pos": [
+        -30.0,
+        20.0
+      ],
+      "stock": {}
+    },
+    {
+      "id": "lekhan",
+      "role": "scribe",
+      "pos": [
+        -30.0,
+        -10.0
+      ],
+      "stock": {}
+    },
+    {
+      "id": "head",
+      "role": "builder",
+      "pos": [
+        0.0,
+        0.0
+      ],
+      "stock": {}
+    }
+  ],
+  "storms": [
+    {
+      "start": 7000,
+      "duration": 1600,
+      "strength": 1.0
+    }
+  ],
+  "creatures": [
+    {
+      "x_from": 100,
+      "x_to": 120,
+      "active_until": 2400,
+      "kind": "makara"
+    }
+  ],
+  "events": [
+    {
+      "tick": 0,
+      "id": "day_start",
+      "dialogue": "day5_intro"
+    },
+    {
+      "tick": 6600,
+      "id": "storm_warning",
+      "dialogue": "advisor#sadv_nila_morale"
+    },
+    {
+      "tick": 9600,
+      "id": "finale",
+      "dialogue": "finale"
+    }
+  ]
+}

@@ -25,3 +25,12 @@ Piles are also the crew sites: `assign_crews {role, site: <pile id>}`. The shore
 `draw_route {id, from, to, kind, points: [[x,z],...], haulers}`, `assign_crews {role, site, crews}`,
 `build_station {kind, pos}`, `place_measuring_line {deg}`, `ring_gong {id}`, `chant_jaya {}`.
 Load with `DayFlow.queue_commands(commands)`; they are applied at their tick (equal ticks keep file order).
+
+## Dialogue references in events
+`dialogue` is a dialogue file id in `data/dialogue/` (for example `day2_intro`, `finale`), or `file#node` to start a
+file at a given node (for example `advisor#sadv_nala_align`, a single advisor line). Days 1-5 are written by the design agent.
+
+## Bridge continuity across days
+Each day builds its own `Bridge` starting at local x = 0. The game layer keeps the total built so far and offsets that
+day's BridgeView and the bridge head by the cumulative length, so the bridge reads as one continuous structure.
+Creature zones (`x_from`, `x_to`) are in the day's local coordinates.

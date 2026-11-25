@@ -1,0 +1,83 @@
+{
+  "day": 2,
+  "target_yojanas": 20,
+  "day_ticks": 9600,
+  "total_crews": 30,
+  "rama_present": false,
+  "night_from": -1,
+  "piles": [
+    {
+      "id": "quarry",
+      "role": "cutter",
+      "pos": [
+        -70.0,
+        -40.0
+      ],
+      "stock": {
+        "stone": 10
+      }
+    },
+    {
+      "id": "forest",
+      "role": "lumberjack",
+      "pos": [
+        -65.0,
+        50.0
+      ],
+      "stock": {
+        "timber": 20
+      }
+    },
+    {
+      "id": "ropeworks",
+      "role": "lasher",
+      "pos": [
+        -30.0,
+        20.0
+      ],
+      "stock": {}
+    },
+    {
+      "id": "lekhan",
+      "role": "scribe",
+      "pos": [
+        -30.0,
+        -10.0
+      ],
+      "stock": {}
+    },
+    {
+      "id": "head",
+      "role": "builder",
+      "pos": [
+        0.0,
+        0.0
+      ],
+      "stock": {}
+    }
+  ],
+  "storms": [],
+  "creatures": [],
+  "events": [
+    {
+      "tick": 0,
+      "id": "day_start",
+      "dialogue": "day2_intro"
+    },
+    {
+      "tick": 2400,
+      "id": "currents_rise",
+      "dialogue": "advisor#sadv_nala_align"
+    },
+    {
+      "tick": 9000,
+      "id": "sunset_near",
+      "dialogue": "advisor#sadv_nala_bless"
+    },
+    {
+      "tick": 9600,
+      "id": "vignette",
+      "dialogue": "vignette_squirrel"
+    }
+  ]
+}

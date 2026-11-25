@@ -6,17 +6,73 @@
   "rama_present": false,
   "night_from": -1,
   "piles": [
-    {"id": "quarry", "role": "cutter", "pos": [-60.0, -30.0], "stock": {"stone": 10}},
-    {"id": "forest", "role": "lumberjack", "pos": [-60.0, 40.0], "stock": {"timber": 20}},
-    {"id": "ropeworks", "role": "lasher", "pos": [-30.0, 20.0], "stock": {}},
-    {"id": "lekhan", "role": "scribe", "pos": [-30.0, -10.0], "stock": {}},
-    {"id": "head", "role": "builder", "pos": [0.0, 0.0], "stock": {}}
+    {
+      "id": "quarry",
+      "role": "cutter",
+      "pos": [
+        -60.0,
+        -30.0
+      ],
+      "stock": {
+        "stone": 10
+      }
+    },
+    {
+      "id": "forest",
+      "role": "lumberjack",
+      "pos": [
+        -60.0,
+        40.0
+      ],
+      "stock": {
+        "timber": 20
+      }
+    },
+    {
+      "id": "ropeworks",
+      "role": "lasher",
+      "pos": [
+        -30.0,
+        20.0
+      ],
+      "stock": {}
+    },
+    {
+      "id": "lekhan",
+      "role": "scribe",
+      "pos": [
+        -30.0,
+        -10.0
+      ],
+      "stock": {}
+    },
+    {
+      "id": "head",
+      "role": "builder",
+      "pos": [
+        0.0,
+        0.0
+      ],
+      "stock": {}
+    }
   ],
   "storms": [],
   "creatures": [],
   "events": [
-    {"tick": 0, "id": "day_start", "dialogue": "day1_intro"},
-    {"tick": 4800, "id": "midday", "dialogue": "day1_midday"},
-    {"tick": 9000, "id": "sunset_near", "dialogue": "day1_sunset"}
+    {
+      "tick": 0,
+      "id": "day_start",
+      "dialogue": "day1_intro"
+    },
+    {
+      "tick": 4800,
+      "id": "midday",
+      "dialogue": "advisor#sadv_nila_morale"
+    },
+    {
+      "tick": 9000,
+      "id": "sunset_near",
+      "dialogue": "advisor#sadv_nala_bless"
+    }
   ]
 }

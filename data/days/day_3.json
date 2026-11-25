@@ -1,0 +1,89 @@
+{
+  "day": 3,
+  "target_yojanas": 21,
+  "day_ticks": 9600,
+  "total_crews": 32,
+  "rama_present": false,
+  "night_from": 6400,
+  "piles": [
+    {
+      "id": "quarry",
+      "role": "cutter",
+      "pos": [
+        -80.0,
+        -30.0
+      ],
+      "stock": {
+        "stone": 10
+      }
+    },
+    {
+      "id": "forest",
+      "role": "lumberjack",
+      "pos": [
+        -70.0,
+        60.0
+      ],
+      "stock": {
+        "timber": 20
+      }
+    },
+    {
+      "id": "ropeworks",
+      "role": "lasher",
+      "pos": [
+        -30.0,
+        20.0
+      ],
+      "stock": {}
+    },
+    {
+      "id": "lekhan",
+      "role": "scribe",
+      "pos": [
+        -30.0,
+        -10.0
+      ],
+      "stock": {}
+    },
+    {
+      "id": "head",
+      "role": "builder",
+      "pos": [
+        0.0,
+        0.0
+      ],
+      "stock": {}
+    }
+  ],
+  "storms": [
+    {
+      "start": 4600,
+      "duration": 700,
+      "strength": 0.6
+    }
+  ],
+  "creatures": [],
+  "events": [
+    {
+      "tick": 0,
+      "id": "day_start",
+      "dialogue": "day3_intro"
+    },
+    {
+      "tick": 4400,
+      "id": "squall_warning",
+      "dialogue": "advisor#sadv_nala_align"
+    },
+    {
+      "tick": 6400,
+      "id": "nightfall",
+      "dialogue": "advisor#sadv_nila_morale"
+    },
+    {
+      "tick": 9000,
+      "id": "sunset_near",
+      "dialogue": "advisor#sadv_nala_bless"
+    }
+  ]
+}
