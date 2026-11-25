@@ -6,6 +6,38 @@ extends GdUnitTestSuite
 const SCRIPT_PATH: String = "res://ui/menus.gd"
 
 var _resume_count: int = 0
+var _fixtures: Array[Translation] = []
+
+## The UI_MENU_* strings are owned by the content strings file (SC2), not by this module.
+## The suite registers its own en/hi translations for these keys so the label checks are self-contained.
+const FIXTURE_STRINGS: Array[Array] = [
+	["UI_MENU_TITLE", "Setu — The Bridge to Lanka", "सेतु — लंका तक का सेतु"],
+	["UI_MENU_BEGIN", "Begin", "आरंभ करें"],
+	["UI_MENU_RESUME", "Resume", "जारी रखें"],
+	["UI_MENU_SETTINGS", "Settings", "सेटिंग्स"],
+	["UI_MENU_QUIT", "Quit", "बाहर निकलें"],
+	["UI_MENU_QUIT_TO_TITLE", "Quit to title", "शीर्षक पर लौटें"],
+	["UI_MENU_BACK", "Back", "वापस"],
+	["UI_MENU_PAUSED", "Paused", "विराम"],
+	["UI_MENU_LANGUAGE", "Language", "भाषा"],
+	["UI_MENU_LANG_EN", "English", "English"],
+	["UI_MENU_LANG_HI", "हिन्दी", "हिन्दी"],
+	["UI_MENU_SHLOKA_CARDS", "Shloka cards", "श्लोक कार्ड"],
+	["UI_MENU_SHLOKA_ON", "On", "चालू"],
+	["UI_MENU_SHLOKA_SHORT", "Short", "संक्षिप्त"],
+	["UI_MENU_SHLOKA_OFF", "Off", "बंद"],
+	["UI_MENU_FPS", "Frame rate cap", "फ़्रेम दर सीमा"],
+	["UI_MENU_FPS_UNLIMITED", "Unlimited", "असीमित"],
+	["UI_MENU_GRAPHICS", "Graphics", "ग्राफ़िक्स"],
+	["UI_MENU_GFX_LOW", "Low", "निम्न"],
+	["UI_MENU_GFX_MEDIUM", "Medium", "मध्यम"],
+	["UI_MENU_GFX_HIGH", "High", "उच्च"],
+	["UI_MENU_VSYNC", "VSync", "वर्टिकल सिंक"],
+	["UI_MENU_FULLSCREEN", "Fullscreen", "पूर्ण स्क्रीन"],
+	["UI_MENU_VOLUME_MASTER", "Master volume", "मुख्य आवाज़"],
+	["UI_MENU_VOLUME_MUSIC", "Music volume", "संगीत की आवाज़"],
+	["UI_MENU_VOLUME_SFX", "Sound effects volume", "ध्वनि प्रभाव की आवाज़"],
+]
 
 
 func _on_resume() -> void:
@@ -32,6 +64,18 @@ func _label(menu: Menus, node_name: String) -> Label:
 	return menu.find_child(node_name, true, false) as Label
 
 
+func before_test() -> void:
+	_fixtures.clear()
+	for code: String in ["en", "hi"]:
+		var translation: Translation = Translation.new()
+		translation.locale = code
+		for row: Array in FIXTURE_STRINGS:
+			var text_index: int = 1 if code == "en" else 2
+			translation.add_message(str(row[0]), str(row[text_index]))
+		TranslationServer.add_translation(translation)
+		_fixtures.append(translation)
+
+
 func after_test() -> void:
 	_locale().call("set_language", &"en")
 	_resume_count = 0
@@ -46,6 +90,9 @@ func after_test() -> void:
 	probe.set_option(&"volume_music", 1.0)
 	probe.set_option(&"volume_sfx", 1.0)
 	probe.hide_menus()
+	for translation: Translation in _fixtures:
+		TranslationServer.remove_translation(translation)
+	_fixtures.clear()
 
 
 # --- Frame rate cap -----------------------------------------------------------
