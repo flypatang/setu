@@ -43,6 +43,13 @@ func _key(code: int) -> InputEventKey:
 	return ev
 
 
+func _pad(button: int, pressed: bool) -> InputEventJoypadButton:
+	var ev: InputEventJoypadButton = InputEventJoypadButton.new()
+	ev.button_index = button as JoyButton
+	ev.pressed = pressed
+	return ev
+
+
 func _click(ctrl: InputController, pos: Vector2) -> void:
 	ctrl._unhandled_input(_mouse(MOUSE_BUTTON_LEFT, true, pos))
 	ctrl._unhandled_input(_mouse(MOUSE_BUTTON_LEFT, false, pos))
@@ -52,8 +59,22 @@ func test_ensure_input_actions_registers_all_actions() -> void:
 	var ctrl: InputController = InputController.new()
 	auto_free(ctrl)
 	ctrl.ensure_input_actions()
-	for action: String in ["select", "cancel", "menu", "speed_up", "speed_down", "pause"]:
+	for action: String in ["select", "cancel", "menu", "speed_up", "speed_down", "pause", "gong", "chant",
+			"cursor_left", "cursor_right", "cursor_up", "cursor_down"]:
 		assert_bool(InputMap.has_action(StringName(action))).is_true()
+
+
+func test_gamepad_events_are_registered_on_actions() -> void:
+	var ctrl: InputController = InputController.new()
+	auto_free(ctrl)
+	ctrl.ensure_input_actions()
+	for pair: Array in [[&"select", JOY_BUTTON_A], [&"cancel", JOY_BUTTON_B], [&"pause", JOY_BUTTON_START],
+			[&"speed_up", JOY_BUTTON_DPAD_UP], [&"speed_down", JOY_BUTTON_DPAD_DOWN], [&"gong", JOY_BUTTON_X],
+			[&"chant", JOY_BUTTON_Y], [&"menu", JOY_BUTTON_LEFT_SHOULDER], [&"menu", JOY_BUTTON_RIGHT_SHOULDER]]:
+		var ev: InputEventJoypadButton = InputEventJoypadButton.new()
+		ev.button_index = pair[1] as JoyButton
+		ev.pressed = true
+		assert_bool(ev.is_action_pressed(pair[0] as StringName)).is_true()
 
 
 func test_assign_crews_command_dict() -> void:
@@ -189,6 +210,91 @@ func test_time_keys_request_time_control_without_commands() -> void:
 	ctrl._unhandled_input(_key(KEY_MINUS))
 	assert_array(requested).is_equal([&"pause", &"speed_up", &"speed_down"])
 	assert_int(ctrl.log.count()).is_equal(0)
+
+
+func test_gamepad_a_places_station_at_cursor() -> void:
+	var flow: DayFlow = _load_flow()
+	var ctrl: InputController = _make_controller(flow)
+	ctrl.begin_station("lekhan")
+	ctrl.set_cursor(Vector2(300.0, 50.0))
+	ctrl._unhandled_input(_pad(JOY_BUTTON_A, true))
+	assert_dict(ctrl.last_command).is_equal({
+		"tick": 0, "type": "build_station", "args": {"kind": "lekhan", "pos": [30.0, 5.0]},
+	})
+	assert_bool(ctrl.last_accepted).is_true()
+
+
+func test_gamepad_route_drawn_at_cursor_and_finished_with_shoulder() -> void:
+	var flow: DayFlow = _load_flow()
+	var ctrl: InputController = _make_controller(flow)
+	ctrl.begin_route("r4", "forest", "head", "stone", 10)
+	ctrl.set_cursor(Vector2(600.0, 400.0))
+	ctrl._unhandled_input(_pad(JOY_BUTTON_A, true))
+	ctrl.set_cursor(Vector2(300.0, 200.0))
+	ctrl._unhandled_input(_pad(JOY_BUTTON_A, true))
+	ctrl._unhandled_input(_pad(JOY_BUTTON_RIGHT_SHOULDER, true))
+	assert_str(ctrl.mode()).is_equal("idle")
+	assert_dict(ctrl.last_command).is_equal({
+		"tick": 0, "type": "draw_route",
+		"args": {
+			"id": "r4", "from": "forest", "to": "head", "kind": "stone", "haulers": 10,
+			"points": [[60.0, 40.0], [30.0, 20.0]],
+		},
+	})
+
+
+func test_gamepad_cancel_drops_route_in_progress() -> void:
+	var flow: DayFlow = _load_flow()
+	var ctrl: InputController = _make_controller(flow)
+	ctrl.begin_route("r5", "forest", "head", "stone", 10)
+	ctrl.set_cursor(Vector2(600.0, 400.0))
+	ctrl._unhandled_input(_pad(JOY_BUTTON_A, true))
+	ctrl._unhandled_input(_pad(JOY_BUTTON_B, true))
+	assert_str(ctrl.mode()).is_equal("idle")
+	ctrl._unhandled_input(_pad(JOY_BUTTON_LEFT_SHOULDER, true))
+	assert_int(ctrl.log.count()).is_equal(0)
+
+
+func test_gamepad_measuring_line_from_cursor_drag() -> void:
+	var flow: DayFlow = _load_flow()
+	var ctrl: InputController = _make_controller(flow)
+	ctrl.begin_measure()
+	ctrl.set_cursor(Vector2(0.0, 0.0))
+	ctrl._unhandled_input(_pad(JOY_BUTTON_A, true))
+	ctrl.set_cursor(Vector2(100.0, 100.0))
+	ctrl._unhandled_input(_pad(JOY_BUTTON_A, false))
+	assert_str(ctrl.last_command["type"] as String).is_equal("place_measuring_line")
+	assert_float(((ctrl.last_command["args"] as Dictionary)["deg"] as float)).is_equal_approx(45.0, 0.001)
+
+
+func test_gamepad_buttons_map_to_time_gong_and_chant() -> void:
+	var flow: DayFlow = _load_flow()
+	var ctrl: InputController = _make_controller(flow)
+	var requested: Array[StringName] = []
+	ctrl.time_requested.connect(func(action: StringName) -> void: requested.append(action))
+	ctrl._unhandled_input(_pad(JOY_BUTTON_START, true))
+	ctrl._unhandled_input(_pad(JOY_BUTTON_DPAD_UP, true))
+	ctrl._unhandled_input(_pad(JOY_BUTTON_DPAD_DOWN, true))
+	assert_array(requested).is_equal([&"pause", &"speed_up", &"speed_down"])
+	assert_int(ctrl.log.count()).is_equal(0)
+	ctrl.select_gong("3")
+	ctrl._unhandled_input(_pad(JOY_BUTTON_X, true))
+	assert_dict(ctrl.last_command).is_equal({"tick": 0, "type": "ring_gong", "args": {"id": "3"}})
+	ctrl._unhandled_input(_pad(JOY_BUTTON_Y, true))
+	assert_dict(ctrl.last_command).is_equal({"tick": 0, "type": "chant_jaya", "args": {}})
+
+
+func test_move_cursor_follows_stick_and_stays_on_screen() -> void:
+	var flow: DayFlow = _load_flow()
+	var ctrl: InputController = _make_controller(flow)
+	ctrl.set_cursor(Vector2(100.0, 100.0))
+	ctrl.move_cursor(Vector2(0.0, -1.0), 0.1)
+	assert_float(ctrl.cursor().x).is_equal_approx(100.0, 0.001)
+	assert_float(ctrl.cursor().y).is_equal_approx(10.0, 0.001)
+	ctrl.move_cursor(Vector2(0.0, -1.0), 10.0)
+	assert_float(ctrl.cursor().y).is_equal_approx(0.0, 0.001)
+	ctrl.move_cursor(Vector2.ZERO, 1.0)
+	assert_float(ctrl.cursor().y).is_equal_approx(0.0, 0.001)
 
 
 func test_ray_to_ground_straight_down() -> void:
