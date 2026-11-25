@@ -28,8 +28,17 @@ var _advisor_text: Label = null
 
 
 func _init() -> void:
+	# A translucent backing panel keeps the HUD readable over bright sand and busy crowds (alpha review 2026-11-26).
+	var panel: PanelContainer = PanelContainer.new()
+	panel.name = "Backing"
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(Palette.UI_DARK, 0.62)
+	style.set_corner_radius_all(6)
+	style.set_content_margin_all(10)
+	panel.add_theme_stylebox_override(&"panel", style)
+	add_child(panel)
 	var box: VBoxContainer = VBoxContainer.new()
-	add_child(box)
+	panel.add_child(box)
 	_clock_label = _make_label(box)
 	_length_label = _make_label(box)
 	for kind: String in Stockpile.KINDS:

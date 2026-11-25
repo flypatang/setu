@@ -3,7 +3,7 @@ config_version=5
 
 [application]
 config/name="Setu — The Bridge to Lanka"
-config/version="0.1.0-alpha.1"
+config/version="0.1.0-alpha.2"
 run/main_scene="res://main.tscn"
 run/max_fps=60
 config/features=PackedStringArray("4.7", "Forward Plus")

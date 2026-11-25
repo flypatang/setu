@@ -253,7 +253,7 @@ func _build_lights() -> void:
 
 
 func _build_shore() -> void:
-	var sand: MeshInstance3D = _mesh_node("Shore", MeshKit.box(Vector3(6.0, 0.5, SHORE_LENGTH), Palette.SHORE_SAND))
+	var sand: MeshInstance3D = _mesh_node("Shore", MeshKit.box(Vector3(6.0, 0.5, SHORE_LENGTH), Palette.SHORE_SAND.darkened(0.28)))
 	sand.position = Vector3(0.0, -0.25, 0.0)
 	add_child(sand)
 	var land: MeshInstance3D = _mesh_node("Land", MeshKit.box(Vector3(LAND_WIDTH, 0.5, SHORE_LENGTH), Palette.LEAF_DARK))
