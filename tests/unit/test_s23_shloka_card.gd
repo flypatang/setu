@@ -41,9 +41,10 @@ func test_on_mode_closes_with_closed_signal_carrying_the_id() -> void:
 	_card.mode = ShlokaCard.MODE_ON
 	_card.show_shloka(StringName(SHLOKA_ID))
 	_card.advance_time(4.0)
-	monitor_signals(_card)
+	var got: Array[StringName] = []
+	_card.closed.connect(func(id: StringName) -> void: got.append(id))
 	_card.handle_input_event(_key_event())
-	assert_signal(_card).is_emitted("closed", [StringName(SHLOKA_ID)])
+	assert_array(got).is_equal([StringName(SHLOKA_ID)])
 
 
 func test_on_mode_does_not_close_by_itself() -> void:
@@ -66,10 +67,11 @@ func test_short_mode_shows_translation_only_and_closes_after_three_seconds() -> 
 
 func test_off_mode_skips_the_card_at_once() -> void:
 	_card.mode = ShlokaCard.MODE_OFF
-	monitor_signals(_card)
+	var got: Array[StringName] = []
+	_card.closed.connect(func(id: StringName) -> void: got.append(id))
 	_card.show_shloka(StringName(SHLOKA_ID))
 	assert_bool(_card.is_open()).is_false()
-	assert_signal(_card).is_emitted("closed", [StringName(SHLOKA_ID)])
+	assert_array(got).is_equal([StringName(SHLOKA_ID)])
 
 
 func test_on_mode_shows_devanagari_iast_and_reference_from_data() -> void:

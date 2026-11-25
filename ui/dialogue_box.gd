@@ -44,6 +44,7 @@ var _playing: bool = false
 var _card_open: bool = false
 var _file_id: StringName = &""
 var _choices_dirty: bool = false
+var _entry_path: String = ""
 
 
 func _ready() -> void:
@@ -250,6 +251,7 @@ func _build() -> void:
 
 
 func _reset() -> void:
+	_remove_entry()
 	_clear_choices()
 	_clusters = []
 	_revealed = 0
@@ -287,13 +289,25 @@ func _write_entry(file: String, node: String) -> StringName:
 		return &""
 	data["start"] = node
 	DirAccess.make_dir_recursive_absolute(ENTRY_CACHE_DIR)
-	var entry_id: String = "%s@%s" % [file, node]
-	var out: FileAccess = FileAccess.open(ENTRY_CACHE_DIR + entry_id + ".json", FileAccess.WRITE)
+	# The process id keeps two running games from writing the same entry file.
+	var entry_id: String = "%s@%s@%d" % [file, node, OS.get_process_id()]
+	var path: String = ENTRY_CACHE_DIR + entry_id + ".json"
+	var out: FileAccess = FileAccess.open(path, FileAccess.WRITE)
 	if out == null:
 		return &""
 	out.store_string(JSON.stringify(data))
 	out.close()
+	_entry_path = path
 	return StringName(entry_id)
+
+
+## Deletes the copy written for a "file#node" start, if there is one.
+func _remove_entry() -> void:
+	if _entry_path.is_empty():
+		return
+	if FileAccess.file_exists(_entry_path):
+		DirAccess.remove_absolute(_entry_path)
+	_entry_path = ""
 
 
 func _advance_runner() -> void:
@@ -332,6 +346,7 @@ func _on_card_closed(_shloka_id: StringName) -> void:
 
 
 func _on_runner_finished(_runner_id: StringName) -> void:
+	_remove_entry()
 	_playing = false
 	_card_open = false
 	_clear_choices()

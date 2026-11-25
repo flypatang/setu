@@ -136,9 +136,10 @@ func test_choice_button_emits_choice_selected_and_moves_on() -> void:
 	_box.reveal_all()
 	var buttons: Array[Button] = _box.choice_buttons()
 	assert_int(buttons.size()).is_equal(2)
-	monitor_signals(_box)
+	var picked: Array[int] = []
+	_box.choice_selected.connect(func(i: int) -> void: picked.append(i))
 	buttons[1].pressed.emit()
-	assert_signal(_box).is_emitted("choice_selected", [1])
+	assert_array(picked).is_equal([1])
 	assert_str(_box.get_runner().current_node()).is_equal("n4")
 	assert_str(_box.revealed_text()).is_equal("")
 
@@ -160,12 +161,13 @@ func test_play_at_a_node_reference_starts_there() -> void:
 
 func test_finishing_the_dialogue_emits_finished_and_hides() -> void:
 	_box.play(StringName(MAIN_FILE + "#n5"))
-	monitor_signals(_box)
+	var done: Array[StringName] = []
+	_box.finished.connect(func(id: StringName) -> void: done.append(id))
 	_box.reveal_all()
 	_box.handle_input_event(_accept_event())
 	assert_bool(_box.is_playing()).is_false()
 	assert_bool(_box.visible).is_false()
-	assert_signal(_box).is_emitted("finished", [StringName(MAIN_FILE)])
+	assert_array(done).is_equal([StringName(MAIN_FILE)])
 
 
 # --- shloka steps ----------------------------------------------------------------------------------------------
