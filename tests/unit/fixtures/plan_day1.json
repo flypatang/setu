@@ -1,0 +1,153 @@
+{
+ "day": 1,
+ "commands": [
+  {
+   "tick": 0,
+   "type": "assign_crews",
+   "args": {
+    "role": "cutter",
+    "site": "quarry",
+    "crews": 2
+   }
+  },
+  {
+   "tick": 0,
+   "type": "assign_crews",
+   "args": {
+    "role": "lumberjack",
+    "site": "forest",
+    "crews": 2
+   }
+  },
+  {
+   "tick": 0,
+   "type": "assign_crews",
+   "args": {
+    "role": "lasher",
+    "site": "ropeworks",
+    "crews": 1
+   }
+  },
+  {
+   "tick": 0,
+   "type": "assign_crews",
+   "args": {
+    "role": "scribe",
+    "site": "lekhan",
+    "crews": 2
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "q_l",
+    "from": "quarry",
+    "to": "lekhan",
+    "kind": "stone",
+    "haulers": 36,
+    "points": [
+     [
+      -60,
+      -30
+     ],
+     [
+      -30,
+      -10
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "l_h",
+    "from": "lekhan",
+    "to": "head",
+    "kind": "inscribed_stone",
+    "haulers": 36,
+    "points": [
+     [
+      -30,
+      -10
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "f_h",
+    "from": "forest",
+    "to": "head",
+    "kind": "timber",
+    "haulers": 30,
+    "points": [
+     [
+      -30,
+      10
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "f_r",
+    "from": "forest",
+    "to": "ropeworks",
+    "kind": "timber",
+    "haulers": 12,
+    "points": [
+     [
+      -30,
+      10
+     ],
+     [
+      -30,
+      20
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "draw_route",
+   "args": {
+    "id": "r_h",
+    "from": "ropeworks",
+    "to": "head",
+    "kind": "rope",
+    "haulers": 12,
+    "points": [
+     [
+      -30,
+      20
+     ],
+     [
+      0,
+      0
+     ]
+    ]
+   }
+  },
+  {
+   "tick": 0,
+   "type": "place_measuring_line",
+   "args": {
+    "deg": 0.0
+   }
+  }
+ ]
+}
