@@ -10,6 +10,9 @@ const SECTION_MARGIN: int = 10
 const CURRENT_EVERY_TICKS: int = 20
 const HAULERS_PER_CREW: int = 10
 const NODE_RADIUS_M: float = 15.0
+## Lekhan and ropeworks must be on the near shore: x strictly below this (data/days/SCHEMA.md,
+## 'Resource nodes'). x == 0 (the bridge head start) is deliberately rejected.
+const SHORE_MAX_X: float = 0.0
 const ALIGN_TOLERANCE_DEG: float = 2.0
 const W_LENGTH: float = 0.5
 const W_ALIGN: float = 0.2
@@ -313,7 +316,7 @@ func _cmd_build_station(args: Dictionary) -> bool:
 	var at: Vector2 = Vector2(_num(pos[0]), _num(pos[1]))
 	if (kind == "quarry" or kind == "forest") and not _near_node(kind, at):
 		return false
-	if (kind == "lekhan" or kind == "ropeworks") and at.x >= 0.0:
+	if (kind == "lekhan" or kind == "ropeworks") and at.x >= SHORE_MAX_X:
 		return false
 	_station_count += 1
 	var id: String = "%s_%d" % [kind, _station_count]
@@ -321,7 +324,7 @@ func _cmd_build_station(args: Dictionary) -> bool:
 	return _piles.has(id)
 
 
-## True when the node list is empty-free match: some node of this kind lies within NODE_RADIUS_M.
+## True when some node of this kind lies within NODE_RADIUS_M of at.
 func _near_node(kind: String, at: Vector2) -> bool:
 	for n: Vector2 in _nodes.get(kind, [] as Array[Vector2]) as Array[Vector2]:
 		if n.distance_to(at) <= NODE_RADIUS_M:

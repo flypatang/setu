@@ -216,10 +216,10 @@ func test_gamepad_a_places_station_at_cursor() -> void:
 	var flow: DayFlow = _load_flow()
 	var ctrl: InputController = _make_controller(flow)
 	ctrl.begin_station("lekhan")
-	ctrl.set_cursor(Vector2(300.0, 50.0))
+	ctrl.set_cursor(Vector2(-300.0, 50.0))
 	ctrl._unhandled_input(_pad(JOY_BUTTON_A, true))
 	assert_dict(ctrl.last_command).is_equal({
-		"tick": 0, "type": "build_station", "args": {"kind": "lekhan", "pos": [30.0, 5.0]},
+		"tick": 0, "type": "build_station", "args": {"kind": "lekhan", "pos": [-30.0, 5.0]},
 	})
 	assert_bool(ctrl.last_accepted).is_true()
 

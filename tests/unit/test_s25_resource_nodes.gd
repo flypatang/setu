@@ -67,3 +67,10 @@ func test_new_station_at_node_can_be_crewed() -> void:
 	var f: DayFlow = _flow()
 	assert_bool(_station(f, "quarry", -75.0, -20.0)).is_true()
 	assert_bool(f.apply_command({"type": "assign_crews", "args": {"role": "cutter", "site": "quarry_1", "crews": 1}})).is_true()
+
+
+func test_lekhan_at_exactly_shore_limit_rejected() -> void:
+	var f: DayFlow = _flow()
+	assert_float(DayFlow.SHORE_MAX_X).is_equal(0.0)
+	assert_bool(_station(f, "lekhan", DayFlow.SHORE_MAX_X, 3.0)).is_false()
+	assert_bool(_station(f, "lekhan", -0.1, 3.0)).is_true()
