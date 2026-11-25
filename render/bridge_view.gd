@@ -1,9 +1,13 @@
 class_name BridgeView
 extends Node3D
-## Bridge meshes, one group per section (DESIGN §9, S14, visual fix S14b).
+## Bridge meshes, one group per section (DESIGN §9, S14; visual fixes S14b and S14c).
 ## Reads the Bridge simulation and never writes to it. Each section is 1 m long (along x) and 8 m wide (along z).
-## It shows its foundation stones (WET_STONE, 6 across, each about 1.2 m wide and topped with a Rama glyph of about
-## 0.8 m laid flat, SINDOOR), its timber deck spanning the full width (BARK) and its rope lashings at both edges (ROPE).
+## It shows its foundation stones (WET_STONE, 4 across, each a slightly irregular chamfered block 1.5 m wide),
+## its timber planks along a central 3 m walkway (BARK, set low so the stones stay visible) and its rope
+## lashings at both edges (ROPE). The राम glyph (RamaGlyph textured quad, about 1.2 m wide, SINDOOR) lies on the top
+## of every stone of an even-numbered section, turned to read upright from the default iso camera (yaw 45 degrees):
+## its baseline runs along the screen horizontal. Odd sections carry plain stones, so neighbouring glyphs, which are
+## wider than one section, never overlap.
 ## Broken sections drift away along +z and sink, then are freed; any shimmer over them is removed too.
 ## Blessed sections play a one-off gold shimmer (once per section); the shimmer node is freed when it ends.
 ## Only sections whose visible state changed are rebuilt. A section rebuilt after a break (for example
@@ -14,16 +18,16 @@ extends Node3D
 const SECTION_LENGTH: float = 1.0
 const SECTION_WIDTH: float = 8.0
 const SECTION_CENTER_X: float = 0.5
-const STONES_ACROSS: int = 6
-const STONE_WIDTH: float = 1.2
+const STONES_ACROSS: int = 4
+const STONE_WIDTH: float = 1.5
 const STONE_DEPTH: float = 1.0
 const STONE_HEIGHT: float = 0.9
-const GLYPH_HEIGHT: float = 0.8
-const GLYPH_LIFT: float = 0.01
-## The glyph is 1.47 m wide at height 0.8 m (along x, the stone depth is 1.0 m), so it is squeezed to 0.88 m across x
-## to stay on its stone and clear of the neighbouring sections' glyphs.
-const GLYPH_WIDTH_SCALE: float = 0.6
-const PLANK_SIZE: Vector3 = Vector3(0.25, 0.1, SECTION_WIDTH)
+const STONE_BEVEL: float = 0.07
+const CAMERA_YAW_DEG: float = 45.0
+const GLYPH_WIDTH: float = 1.2
+const GLYPH_HEIGHT: float = GLYPH_WIDTH / RamaGlyph.ASPECT
+const GLYPH_LIFT: float = 0.012
+const PLANK_SIZE: Vector3 = Vector3(0.25, 0.1, 3.0)
 const PLANK_SPACING: float = 0.33
 const PLANK_HEIGHT: float = 0.5
 const LASHING_SIZE: Vector3 = Vector3(SECTION_LENGTH, 0.1, 0.12)
@@ -143,9 +147,10 @@ func _build_section(index: int, s: Bridge.Section) -> void:
 	var stones: int = _visible_stones(s.stone_in)
 	for k: int in stones:
 		var z: float = _stone_z(k)
-		var stone: MeshInstance3D = _add_part(root, _stone(), Vector3(SECTION_CENTER_X, STONE_HEIGHT * 0.5, z))
+		var stone: MeshInstance3D = _add_part(root, _stone(), Vector3(SECTION_CENTER_X, 0.0, z))
 		stone.name = "Stone%d" % k
-		_add_glyph(root, z, k)
+		if index % 2 == 0:
+			_add_glyph(root, z, k)
 	for k: int in s.timber_in:
 		var plank: MeshInstance3D = _add_part(root, _plank(),
 			Vector3(SECTION_CENTER_X + (float(k) - 1.0) * PLANK_SPACING, PLANK_HEIGHT, 0.0))
@@ -165,15 +170,16 @@ func _stone_z(k: int) -> float:
 	return (float(k) - float(STONES_ACROSS - 1) * 0.5) * pitch
 
 
-## The inscribed राम on top of one foundation stone. The glyph (RamaGlyph, S13) is built facing +Z; rotated -90
-## degrees on X it lies flat on the stone top, its height running across the stone (along z).
+## The inscribed राम on top of one foundation stone. The glyph quad (RamaGlyph) faces +Z with its text top at +Y;
+## turned -90 degrees on X it lies flat, its top running to -z, and turned by the camera yaw about Y its baseline
+## runs along the screen horizontal, so it reads upright from the iso camera.
 func _add_glyph(parent: Node3D, z: float, k: int) -> void:
 	var mi: MeshInstance3D = MeshInstance3D.new()
 	mi.mesh = _glyph()
-	mi.material_override = _flat()
-	mi.position = Vector3(SECTION_CENTER_X, STONE_HEIGHT + GLYPH_LIFT, z)
-	mi.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
-	mi.scale = Vector3(GLYPH_WIDTH_SCALE, 1.0, 1.0)
+	mi.material_override = RamaGlyph.material()
+	var flat: Basis = Basis(Vector3.RIGHT, deg_to_rad(-90.0))
+	var yaw: Basis = Basis(Vector3.UP, deg_to_rad(CAMERA_YAW_DEG))
+	mi.transform = Transform3D(yaw * flat, Vector3(SECTION_CENTER_X, STONE_HEIGHT + GLYPH_LIFT, z))
 	mi.name = "Glyph%d" % k
 	parent.add_child(mi)
 
@@ -190,14 +196,63 @@ func _add_part(parent: Node3D, mesh: Mesh, pos: Vector3) -> MeshInstance3D:
 ## Shared meshes are built once and reused by every section.
 func _stone() -> ArrayMesh:
 	if _stone_mesh == null:
-		_stone_mesh = MeshKit.box(Vector3(STONE_DEPTH, STONE_HEIGHT, STONE_WIDTH), Palette.WET_STONE)
+		_stone_mesh = _build_stone()
 	return _stone_mesh
 
 
 func _glyph() -> ArrayMesh:
 	if _glyph_mesh == null:
-		_glyph_mesh = RamaGlyph.mesh(GLYPH_HEIGHT, Palette.SINDOOR)
+		_glyph_mesh = RamaGlyph.quad(GLYPH_HEIGHT, Palette.SINDOOR)
 	return _glyph_mesh
+
+
+## A slightly irregular chamfered block, feet at y = 0 and a flat top at STONE_HEIGHT (so the glyph lies on it).
+## Rings: base (inset), shoulder (full footprint, corners nudged a little differently each), top (inset by the bevel).
+static func _build_stone() -> ArrayMesh:
+	var hx: float = STONE_DEPTH * 0.5
+	var hz: float = STONE_WIDTH * 0.5
+	var bev: float = STONE_BEVEL
+	var shoulder_y: float = STONE_HEIGHT - bev
+	var nudge: Array[Vector2] = [Vector2(-0.02, 0.03), Vector2(0.01, -0.04), Vector2(-0.03, -0.02), Vector2(0.02, 0.02)]
+	var corners: Array[Vector2] = [Vector2(-1.0, -1.0), Vector2(-1.0, 1.0), Vector2(1.0, 1.0), Vector2(1.0, -1.0)]
+	var base: Array[Vector3] = []
+	var shoulder: Array[Vector3] = []
+	var top: Array[Vector3] = []
+	for i: int in 4:
+		var c: Vector2 = corners[i]
+		base.append(Vector3(c.x * (hx - 0.06), 0.0, c.y * (hz - 0.08)))
+		shoulder.append(Vector3(c.x * hx + nudge[i].x, shoulder_y * 0.55, c.y * hz + nudge[i].y))
+		top.append(Vector3(c.x * (hx - bev), STONE_HEIGHT, c.y * (hz - bev)))
+	# A mid ring between base and shoulder is the widest part; the upper wall runs up to the chamfer.
+	var upper: Array[Vector3] = []
+	for i: int in 4:
+		var c: Vector2 = corners[i]
+		upper.append(Vector3(c.x * hx, shoulder_y, c.y * hz))
+	var st: SurfaceTool = SurfaceTool.new()
+	st.begin(Mesh.PRIMITIVE_TRIANGLES)
+	var inside: Vector3 = Vector3(0.0, STONE_HEIGHT * 0.5, 0.0)
+	var col: Color = Palette.WET_STONE
+	for i: int in 4:
+		var j: int = (i + 1) % 4
+		_stone_quad(st, base[i], base[j], shoulder[j], shoulder[i], col, inside)
+		_stone_quad(st, shoulder[i], shoulder[j], upper[j], upper[i], col, inside)
+		_stone_quad(st, upper[i], upper[j], top[j], top[i], col, inside)
+	_stone_quad(st, top[0], top[1], top[2], top[3], col.lightened(0.06), inside)
+	_stone_quad(st, base[3], base[2], base[1], base[0], col, inside)
+	st.generate_normals()
+	return st.commit()
+
+
+## One planar-ish quad as two triangles facing away from `inside`; the vertices are unshared so shading is flat.
+static func _stone_quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector3, col: Color, inside: Vector3) -> void:
+	for tri: Array[Vector3] in [[a, b, c] as Array[Vector3], [a, c, d] as Array[Vector3]]:
+		var n: Vector3 = (tri[1] - tri[0]).cross(tri[2] - tri[0])
+		var order: Array[int] = [0, 1, 2]
+		if n.dot((tri[0] + tri[1] + tri[2]) / 3.0 - inside) < 0.0:
+			order = [0, 2, 1]
+		for o: int in order:
+			st.set_color(col)
+			st.add_vertex(tri[o])
 
 
 func _plank() -> ArrayMesh:
