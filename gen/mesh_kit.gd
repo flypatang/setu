@@ -10,7 +10,7 @@ render_mode diffuse_lambert, specular_disabled;
 
 // Rim disabled: the fresnel term washed every face out under the orthographic iso camera (see the 2026-11-26 art
 // review). Rim lighting comes from a back DirectionalLight in each level's light rig instead.
-const float WARM_RIM_STRENGTH = 0.0;
+const float WARM_RIM_STRENGTH = 0.25;
 const vec3 WARM_RIM = vec3(1.0, 0.82, 0.55);
 const float AMBIENT = 0.30;
 
@@ -242,7 +242,7 @@ static func _quad(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, d: Vector
 	_tri(st, a, c, d, color, interior)
 
 
-## Adds one flat triangle. The winding is flipped if needed so the normal points away from `interior`.
+## Adds one flat triangle whose normal points away from `interior`, wound clockwise (Godot's front face).
 ## Degenerate triangles are dropped.
 static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, color: Color, interior: Vector3) -> void:
 	var n: Vector3 = (b - a).cross(c - a)
@@ -256,12 +256,15 @@ static func _tri(st: SurfaceTool, a: Vector3, b: Vector3, c: Vector3, color: Col
 		p2 = b
 		n = -n
 	var normal: Vector3 = n.normalized()
+	# Godot treats CLOCKWISE triangles (seen from the front) as front faces, so emit a, p2, p1: seen from outside
+	# this is clockwise while the stored normal still points outward. (Found 2026-11-26: the old a, p1, p2 order
+	# rendered every MeshKit solid inside-out under back-face culling.)
 	st.set_normal(normal)
 	st.set_color(color)
 	st.add_vertex(a)
 	st.set_normal(normal)
 	st.set_color(color)
-	st.add_vertex(p1)
+	st.add_vertex(p2)
 	st.set_normal(normal)
 	st.set_color(color)
-	st.add_vertex(p2)
+	st.add_vertex(p1)

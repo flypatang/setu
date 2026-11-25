@@ -19,7 +19,8 @@ func _normals(mesh: ArrayMesh) -> PackedVector3Array:
 
 
 func _assert_outward(mesh: ArrayMesh) -> void:
-	## Every face normal must point away from the mesh centre, and the winding must agree with the normal.
+	## Every face normal must point away from the mesh centre, and the winding must be Godot's front face:
+	## clockwise seen from outside, i.e. the counter-clockwise cross product points AGAINST the stored normal.
 	var verts: PackedVector3Array = _verts(mesh)
 	var normals: PackedVector3Array = _normals(mesh)
 	var centre: Vector3 = mesh.get_aabb().get_center()
@@ -28,7 +29,7 @@ func _assert_outward(mesh: ArrayMesh) -> void:
 		var centroid: Vector3 = (verts[i] + verts[i + 1] + verts[i + 2]) / 3.0
 		assert_bool(normals[i].dot(centroid - centre) > 0.0).is_true()
 		var geometric: Vector3 = (verts[i + 1] - verts[i]).cross(verts[i + 2] - verts[i])
-		assert_bool(geometric.dot(normals[i]) > 0.0).is_true()
+		assert_bool(geometric.dot(normals[i]) < 0.0).is_true()
 		i += 3
 
 
