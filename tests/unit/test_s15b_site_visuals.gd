@@ -88,8 +88,6 @@ func test_lekhan_has_canopy_and_scribes_stones_with_rama_glyph() -> void:
 	for child: Node in lekhan.get_children():
 		if String(child.name).contains("Stele"):
 			assert_object(child.get_node_or_null("RamaGlyph")).is_not_null()
-			var glyph: MeshInstance3D = child.get_node_or_null("RamaGlyph") as MeshInstance3D
-			assert_object(glyph.material_override).is_same(RamaGlyph.material())
 
 
 func test_every_visible_site_has_a_torch_light() -> void:

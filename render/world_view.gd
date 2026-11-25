@@ -329,7 +329,6 @@ func _add_lekhan(site: Node3D) -> void:
 		stele.position = Vector3(x, STELE_SIZE.y * 0.5, 0.0)
 		site.add_child(stele)
 		var glyph: MeshInstance3D = _mesh_node("RamaGlyph", RamaGlyph.mesh(GLYPH_HEIGHT, GLYPH_INK))
-		glyph.material_override = RamaGlyph.material()
 		glyph.position = Vector3(0.0, 0.0, stele_depth * 0.5 + 0.03)
 		stele.add_child(glyph)
 

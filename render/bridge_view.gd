@@ -202,7 +202,7 @@ func _stone() -> ArrayMesh:
 
 func _glyph() -> ArrayMesh:
 	if _glyph_mesh == null:
-		_glyph_mesh = RamaGlyph.mesh(GLYPH_HEIGHT, Palette.SINDOOR)
+		_glyph_mesh = RamaGlyph.quad(GLYPH_HEIGHT, Palette.SINDOOR)
 	return _glyph_mesh
 
 

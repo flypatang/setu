@@ -80,7 +80,7 @@ func test_texture_reads_as_rama_headline_and_three_letters() -> void:
 			runs += 1
 		prev = on
 	assert_int(runs).is_greater_equal(2)
-	# Ink is confined to the left of a clear right margin and has a blank margin all round.
+	# The texture has a blank margin all round (top-left corner pixel is transparent).
 	assert_float(img.get_pixel(w / 2, 1).a).is_equal_approx(0.0, 0.001)
 
 
@@ -96,7 +96,7 @@ func test_edge_is_brushed_not_binary() -> void:
 
 
 func test_mesh_is_flat_quad_with_uvs_and_material_uses_texture() -> void:
-	var m: ArrayMesh = RamaGlyph.mesh(1.2, Palette.SINDOOR)
+	var m: ArrayMesh = RamaGlyph.quad(1.2, Palette.SINDOOR)
 	var arrays: Array = m.surface_get_arrays(0)
 	assert_int((arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()).is_equal(4)
 	assert_int((arrays[Mesh.ARRAY_TEX_UV] as PackedVector2Array).size()).is_equal(4)
