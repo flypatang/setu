@@ -33,7 +33,7 @@ func test_empty_bridge_builds_nothing() -> void:
 
 
 func test_completed_section_has_expected_parts() -> void:
-	# A complete section: 6 foundation stones, each with a glyph, 3 planks and 2 lashings = 17 parts.
+	# A complete section: 4 foundation stones, each with a glyph, 3 planks and 2 lashings = 13 parts.
 	var view: BridgeView = _make_view()
 	var stock: Stockpile = _make_stock()
 	stock.add("inscribed_stone", 4)
@@ -44,11 +44,11 @@ func test_completed_section_has_expected_parts() -> void:
 	assert_bool(b.section(0).complete).is_true()
 	view.sync(b)
 	assert_object(view.get_section_root(0)).is_not_null()
-	assert_int(view.part_count(0)).is_equal(17)
+	assert_int(view.part_count(0)).is_equal(13)
 
 
 func test_partial_section_shows_only_delivered_parts() -> void:
-	# 2 inscribed stones (3 of 6 stones + 3 glyphs) and 1 plank, no lashing = 7 parts.
+	# 2 inscribed stones (2 of 4 stones + 2 glyphs) and 1 plank, no lashing = 5 parts.
 	var view: BridgeView = _make_view()
 	var stock_script: GDScript = load(STOCKPILE_PATH) as GDScript
 	var stock: Stockpile = stock_script.new() as Stockpile
@@ -59,7 +59,7 @@ func test_partial_section_shows_only_delivered_parts() -> void:
 	b.step(0)
 	assert_bool(b.section(0).complete).is_false()
 	view.sync(b)
-	assert_int(view.part_count(0)).is_equal(7)
+	assert_int(view.part_count(0)).is_equal(5)
 
 
 func test_unchanged_sync_does_not_rebuild() -> void:
@@ -214,4 +214,4 @@ func test_broken_then_restored_section_is_rebuilt() -> void:
 	view.sync(b)
 	assert_bool(b.section(0).broken).is_false()
 	assert_object(view.get_section_root(0)).is_not_null()
-	assert_int(view.part_count(0)).is_equal(17)
+	assert_int(view.part_count(0)).is_equal(13)

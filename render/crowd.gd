@@ -1,11 +1,14 @@
 class_name CrowdView
 extends Node3D
 ## Crowd of low-detail vanaras hauling along routes (DESIGN §9, S13). Reads the simulation, never writes it.
-## One MultiMesh for vanaras, plus one per carried-item kind (plain stone, inscribed stone with RamaGlyph, timber).
+## One MultiMesh for vanaras, plus one per carried-item kind (plain stone, inscribed stone, timber).
+## Inscribed stones get a second MultiMesh with the textured RamaGlyph quad lying on top of each carried stone (S14c).
 
 const MAX_INSTANCES: int = 2000
 const ITEM_KINDS: Array[StringName] = [&"stone", &"inscribed_stone", &"timber"]
 const _CARRY_HEIGHT: float = 1.45
+const _GLYPH_HEIGHT: float = 0.28
+const _GLYPH_LIFT: float = 0.16
 
 const _SHADER: String = """shader_type spatial;
 render_mode diffuse_lambert, specular_disabled;
@@ -46,6 +49,7 @@ var _item_mms: Dictionary = {}
 var _vanara_pos: PackedVector3Array = PackedVector3Array()
 var _item_counts: Dictionary = {}
 var _vanara_n: int = 0
+var _glyph_mm: MultiMesh = null
 
 
 func _init() -> void:
@@ -60,6 +64,13 @@ func _init() -> void:
 		_item_mms[k] = mm
 		_item_counts[k] = 0
 		_add_mmi(mm, String(k))
+	_glyph_mm = _make_mm(RamaGlyph.mesh(_GLYPH_HEIGHT, Palette.SINDOOR), 0.0)
+	var gmi: MultiMeshInstance3D = MultiMeshInstance3D.new()
+	gmi.name = "InscribedGlyphs"
+	gmi.multimesh = _glyph_mm
+	gmi.material_override = RamaGlyph.material()
+	gmi.custom_aabb = AABB(Vector3(-400.0, -5.0, -400.0), Vector3(800.0, 30.0, 800.0))
+	add_child(gmi)
 
 
 func vanara_mesh() -> ArrayMesh:
@@ -68,6 +79,11 @@ func vanara_mesh() -> ArrayMesh:
 
 func item_mesh(kind: StringName) -> ArrayMesh:
 	return _item_meshes.get(kind, null) as ArrayMesh
+
+
+## Number of textured राम quads shown (one per carried inscribed stone).
+func glyph_count() -> int:
+	return _glyph_mm.visible_instance_count
 
 
 func vanara_count() -> int:
@@ -120,12 +136,16 @@ func sync(day_flow: DayFlow) -> void:
 				var c: int = counts[kind] as int
 				var ixf: Transform3D = Transform3D(Basis(Vector3.UP, yaw), p + Vector3(0.0, _CARRY_HEIGHT, 0.0))
 				(_item_mms[kind] as MultiMesh).set_instance_transform(c, ixf)
+				if kind == &"inscribed_stone":
+					var lay: Transform3D = Transform3D(Basis(Vector3.RIGHT, deg_to_rad(-90.0)), Vector3(0.0, _GLYPH_LIFT, 0.0))
+					_glyph_mm.set_instance_transform(c, ixf * lay)
 				counts[kind] = c + 1
 	_vanara_n = n
 	_vanara_mm.visible_instance_count = n
 	for k: StringName in ITEM_KINDS:
 		_item_counts[k] = counts[k]
 		(_item_mms[k] as MultiMesh).visible_instance_count = counts[k] as int
+	_glyph_mm.visible_instance_count = counts[&"inscribed_stone"] as int
 
 
 static func _sample(points: PackedVector2Array, dist: float) -> Dictionary:
@@ -187,12 +207,9 @@ static func _build_vanara() -> ArrayMesh:
 	return MeshKit.merge(parts)
 
 
-static func _build_stone(inscribed: bool) -> ArrayMesh:
+static func _build_stone(_inscribed: bool) -> ArrayMesh:
 	var parts: Array[Dictionary] = []
 	parts.append(_part(MeshKit.box(Vector3(0.5, 0.3, 0.4), Palette.STONE), Vector3.ZERO))
-	if inscribed:
-		var glyph: ArrayMesh = RamaGlyph.mesh(0.2, Palette.SINDOOR)
-		parts.append(_part(glyph, Vector3(0.0, 0.16, 0.0), Vector3(-90, 0, 0)))
 	return MeshKit.merge(parts)
 
 
