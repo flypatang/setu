@@ -15,28 +15,8 @@ const FLAG_DAY: StringName = &"day_reached"
 const FLAG_CUMULATIVE: StringName = &"cumulative_m"
 const FLAG_CARRY: StringName = &"carry_m"
 const PROLOGUE_SPEED: int = 2
+const DAY_START_ORTHO: float = 45.0
 const FIRST_STONE_POS: Vector3 = Vector3(-6.0, 0.0, 4.0)
-const CREDITS_TEXT: String = "SETU - The Bridge to Lanka\n\nThe bridge was built in five days:\n14, 20, 21, 22 and 23 yojanas.\n\nBuilt by Nala and Nila, and by every vanara, in the name of Rama.\n\nThank you for playing."
-const UI_FALLBACK: Dictionary = {
-	"UI_MENU_TITLE": "Setu - The Bridge to Lanka", "UI_MENU_BEGIN": "New Game", "UI_MENU_SETTINGS": "Settings",
-	"UI_MENU_QUIT": "Quit", "UI_MENU_PAUSED": "Paused", "UI_MENU_RESUME": "Resume",
-	"UI_MENU_QUIT_TO_TITLE": "Quit to title", "UI_MENU_BACK": "Back", "UI_MENU_LANGUAGE": "Language",
-	"UI_MENU_LANG_EN": "English", "UI_MENU_LANG_HI": "Hindi", "UI_MENU_FPS": "Frame rate",
-	"UI_MENU_FPS_UNLIMITED": "Unlimited", "UI_MENU_GRAPHICS": "Graphics", "UI_MENU_GFX_LOW": "Low",
-	"UI_MENU_GFX_MEDIUM": "Medium", "UI_MENU_GFX_HIGH": "High", "UI_MENU_VSYNC": "VSync",
-	"UI_MENU_FULLSCREEN": "Fullscreen", "UI_MENU_SHLOKA_CARDS": "Shloka cards", "UI_MENU_SHLOKA_ON": "On",
-	"UI_MENU_SHLOKA_SHORT": "Short", "UI_MENU_SHLOKA_OFF": "Off", "UI_MENU_VOLUME_MASTER": "Master volume",
-	"UI_MENU_VOLUME_MUSIC": "Music volume", "UI_MENU_VOLUME_SFX": "Effects volume",
-	"UI_HUD_CLOCK": "Day %d - sunset in %s", "UI_HUD_LENGTH": "Bridge %d / %d m",
-	"UI_HUD_STOCK_STONE": "Stone: %d", "UI_HUD_STOCK_INSCRIBED": "Inscribed stone: %d",
-	"UI_HUD_STOCK_TIMBER": "Timber: %d", "UI_HUD_STOCK_ROPE": "Rope: %d", "UI_HUD_MORALE": "Utsaha (morale): %d",
-	"UI_SUM_TITLE": "Day %d complete", "UI_SUM_LENGTH": "Length: %.0f%%", "UI_SUM_ALIGN": "Alignment: %.0f%%",
-	"UI_SUM_WASTE": "Waste: %.0f%%", "UI_SUM_MORALE": "Morale: %.0f", "UI_SUM_TOTAL": "Score: %.0f",
-	"UI_SUM_CARRY": "Carried over to the next day: %d m", "UI_SUM_CONTINUE": "Continue",
-	"UI_BUILD_ROUTE": "Haul route", "UI_BUILD_CREWS": "Assign crew", "UI_BUILD_LEKHAN": "Lekhan station",
-	"UI_BUILD_GONG": "Ring gong", "UI_BUILD_SHELTER": "Shelter", "UI_BUILD_MEASURING_LINE": "Measuring line",
-	"UI_BUILD_CHANT": "Jaya chant",
-}
 const ROUTE_PRESETS: Array = [
 	["quarry", "lekhan", "stone"], ["lekhan", "head", "inscribed_stone"], ["forest", "head", "timber"],
 	["forest", "ropeworks", "timber"], ["ropeworks", "head", "rope"],
@@ -69,7 +49,6 @@ var _preset_crew: int = 0
 var _first_stone: Node3D = null
 var _floated: bool = false
 var _t: float = 0.0
-var _fallback_tr: Translation = null
 
 var _stage: Node3D = null
 var _world: WorldView = null
@@ -98,7 +77,6 @@ func _ready() -> void:
 		add_child(game_state)
 	if persist:
 		game_state.call("load_game", SAVE_SLOT)
-	_install_ui_strings()
 	_stage = Node3D.new()
 	_stage.name = "Stage"
 	add_child(_stage)
@@ -108,13 +86,19 @@ func _ready() -> void:
 	add_child(_controller)
 	_controller.time_requested.connect(_on_time_requested)
 	_build_ui()
+	var locale: Node = get_node_or_null("/root/Locale")
+	if locale != null and locale.has_signal("language_changed"):
+		locale.connect("language_changed", Callable(self, "_on_language_changed"))
 	_show_title()
 
 
-func _exit_tree() -> void:
-	if _fallback_tr != null:
-		TranslationServer.remove_translation(_fallback_tr)
-		_fallback_tr = null
+func _notification(what: int) -> void:
+	if what == NOTIFICATION_TRANSLATION_CHANGED:
+		_refresh_translated_text()
+
+
+func _on_language_changed(_code: StringName) -> void:
+	_refresh_translated_text()
 
 
 func _physics_process(delta: float) -> void:
@@ -150,6 +134,16 @@ func cumulative_m() -> int:
 ## World x where the current day's bridge starts (metres built on earlier days).
 func origin_x() -> float:
 	return float(_cumulative)
+
+
+## World x of the bridge head: the origin plus the length built so far today (one metre per section).
+func bridge_head_x() -> float:
+	var built: int = _flow.bridge.length_m() if _flow != null else 0
+	return origin_x() + float(built) * BridgeView.SECTION_LENGTH
+
+
+func hint_label() -> Label:
+	return _hint
 
 
 func bridge_view() -> BridgeView:
@@ -281,7 +275,8 @@ func begin_day(n: int) -> void:
 	_prompt.visible = false
 	_prompt_button.visible = false
 	_build_stage(_day_dict)
-	_camera.focus_on(Vector3(origin_x() - 20.0, 0.0, 0.0))
+	_camera.focus_on(Vector3(bridge_head_x(), 0.0, 0.0))
+	_camera.set_ortho_size(DAY_START_ORTHO)
 	_hud.visible = true
 	_hud.update_from(_flow)
 	_update_speed_label()
@@ -591,8 +586,8 @@ func _build_ui() -> void:
 	_hint.offset_top = -34.0
 	_hint.offset_bottom = -8.0
 	_hint.offset_right = 900.0
-	_hint.text = tr("UI_HUD_CONTROLS")
 	_hint.modulate = Color(1.0, 1.0, 1.0, 0.75)
+	_refresh_translated_text()
 	_build_menu = BuildMenu.new()
 	game_layer.add_child(_build_menu)
 	_build_menu.option_chosen.connect(_on_build_option)
@@ -715,22 +710,10 @@ func _apply_font(c: Control) -> void:
 		c.add_theme_font_override("font", locale.call("font_for", &"ui") as Font)
 
 
-func _t_or(text: String) -> String:
-	return text
-
-
-func _install_ui_strings() -> void:
-	var tr_en: Translation = Translation.new()
-	tr_en.locale = "en"
-	var any: bool = false
-	for key: Variant in UI_FALLBACK.keys():
-		var k: String = str(key)
-		if TranslationServer.translate(k) == StringName(k) or str(TranslationServer.translate(k)) == k:
-			tr_en.add_message(k, str(UI_FALLBACK[k]))
-			any = true
-	if any:
-		_fallback_tr = tr_en
-		TranslationServer.add_translation(tr_en)
+func _refresh_translated_text() -> void:
+	if _hint != null:
+		_hint.text = tr("UI_HUD_CONTROLS")
+	_update_speed_label()
 
 
 # --- input ---------------------------------------------------------------------
