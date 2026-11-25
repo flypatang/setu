@@ -1,0 +1,26 @@
+name: CI
+on:
+  push:
+    branches: [main, "mod/**"]
+  pull_request:
+
+jobs:
+  gates:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/cache@v6
+        with:
+          path: tools/godot
+          key: godot-4.7.2-bin
+      - name: Install Godot (binary only)
+        run: scripts/install-godot.sh 4.7.2 --no-templates
+      - name: Gate 1 - script check (static typing)
+        run: GODOT=tools/godot/godot scripts/check.sh
+      - name: Gate 2 - unit tests
+        run: GODOT=tools/godot/godot scripts/test.sh
+      - uses: actions/upload-artifact@v7
+        if: always()
+        with:
+          name: test-reports
+          path: reports/

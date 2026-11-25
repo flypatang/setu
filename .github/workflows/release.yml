@@ -1,0 +1,28 @@
+name: Release
+on:
+  push:
+    tags: ["v*"]
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v7
+      - name: Install Godot and export templates
+        run: scripts/install-godot.sh 4.7.2
+      - name: Gates
+        run: GODOT=tools/godot/godot scripts/check.sh && GODOT=tools/godot/godot scripts/test.sh
+      - name: Export builds
+        run: |
+          mkdir -p build/linux build/windows
+          tools/godot/godot --headless --export-release "Linux" build/linux/Setu.x86_64
+          tools/godot/godot --headless --export-release "Windows Desktop" build/windows/Setu.exe
+          (cd build/linux && zip -q ../Setu-${GITHUB_REF_NAME}-linux-x86_64.zip Setu.x86_64)
+          (cd build/windows && zip -q ../Setu-${GITHUB_REF_NAME}-windows-x86_64.zip Setu.exe)
+      - name: Publish GitHub release
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: gh release create "$GITHUB_REF_NAME" build/*.zip --title "Setu $GITHUB_REF_NAME" --generate-notes

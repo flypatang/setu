@@ -1,0 +1,6 @@
+.godot/
+build/
+reports/
+*.tmp
+/tools/
+*.translation
