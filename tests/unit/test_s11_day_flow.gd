@@ -106,7 +106,7 @@ func test_commands_validate() -> void:
 		"args": {"role": "cutter", "site": "quarry", "crews": 2}})).is_true()
 	assert_bool(flow.apply_command({"tick": 0, "type": "place_measuring_line", "args": {"deg": 1.5}})).is_true()
 	assert_bool(flow.apply_command({"tick": 0, "type": "build_station",
-		"args": {"kind": "quarry", "pos": [5.0, 5.0]}})).is_true()
+		"args": {"kind": "quarry", "pos": [-62.0, -28.0]}})).is_true()
 	assert_bool(flow.apply_command({"tick": 0, "type": "draw_route", "args": {
 		"id": "x", "from": "quarry", "to": "nowhere", "kind": "stone", "haulers": 10,
 		"points": [[0, 0], [10, 0]]}})).is_false()

@@ -9,6 +9,7 @@ const METERS_PER_YOJANA: int = 10
 const SECTION_MARGIN: int = 10
 const CURRENT_EVERY_TICKS: int = 20
 const HAULERS_PER_CREW: int = 10
+const NODE_RADIUS_M: float = 15.0
 const ALIGN_TOLERANCE_DEG: float = 2.0
 const W_LENGTH: float = 0.5
 const W_ALIGN: float = 0.2
@@ -43,6 +44,7 @@ var _morale_sum: float = 0.0
 var _morale_ticks: int = 0
 var _prev_length: int = 0
 var _blessed: bool = false
+var _nodes: Dictionary = {}
 
 
 ## Loads a day description (the parsed data/days/day_<n>.json). carry_in is the
@@ -72,6 +74,14 @@ func load_day(d: Dictionary, carry_in: int = 0) -> void:
 	_morale_ticks = 0
 	_prev_length = 0
 	_blessed = false
+	_nodes = {}
+	var rn: Dictionary = d.get("resource_nodes", {}) as Dictionary
+	for k: Variant in rn.keys():
+		var pts: Array[Vector2] = []
+		for n: Variant in rn[k] as Array:
+			var na: Array = n as Array
+			pts.append(Vector2(_num(na[0]), _num(na[1])))
+		_nodes[str(k)] = pts
 	for p: Variant in d.get("piles", []) as Array:
 		_load_pile(p as Dictionary)
 	var head: Stockpile = _piles.get("head", null) as Stockpile
@@ -117,6 +127,8 @@ func apply_command(cmd: Dictionary) -> bool:
 		"draw_route":
 			return _cmd_draw_route(args)
 		"assign_crews":
+			if not _assign_allowed(str(args.get("role", "")), str(args.get("site", ""))):
+				return false
 			return crews.assign(StringName(str(args.get("role", ""))),
 				StringName(str(args.get("site", ""))), _int(args.get("crews", 0)))
 		"build_station":
@@ -298,10 +310,36 @@ func _cmd_build_station(args: Dictionary) -> bool:
 	if not roles.has(kind):
 		return false
 	var pos: Array = args.get("pos", [0.0, 0.0]) as Array
+	var at: Vector2 = Vector2(_num(pos[0]), _num(pos[1]))
+	if (kind == "quarry" or kind == "forest") and not _near_node(kind, at):
+		return false
+	if (kind == "lekhan" or kind == "ropeworks") and at.x >= 0.0:
+		return false
 	_station_count += 1
 	var id: String = "%s_%d" % [kind, _station_count]
 	_load_pile({"id": id, "role": str(roles[kind]), "pos": pos})
 	return _piles.has(id)
+
+
+## True when the node list is empty-free match: some node of this kind lies within NODE_RADIUS_M.
+func _near_node(kind: String, at: Vector2) -> bool:
+	for n: Vector2 in _nodes.get(kind, [] as Array[Vector2]) as Array[Vector2]:
+		if n.distance_to(at) <= NODE_RADIUS_M:
+			return true
+	return false
+
+
+func _assign_allowed(role: String, site: String) -> bool:
+	var kind: String = ""
+	if role == "cutter":
+		kind = "quarry"
+	elif role == "lumberjack":
+		kind = "forest"
+	else:
+		return true
+	if not _pile_pos.has(site):
+		return true
+	return _near_node(kind, _pile_pos[site] as Vector2)
 
 
 func _step_one() -> void:
