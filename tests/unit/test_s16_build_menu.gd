@@ -14,8 +14,43 @@ func _make_menu() -> BuildMenu:
 	return menu
 
 
+var _translations: Array[Translation] = []
+
+
+## Installs test-local en and hi catalogues for the UI_BUILD_* keys; the shared strings CSV is not used here.
+func _install_build_translations() -> void:
+	var en: Translation = Translation.new()
+	en.locale = "en"
+	en.add_message(&"UI_BUILD_ROUTE", "Route")
+	en.add_message(&"UI_BUILD_CREWS", "Crews")
+	en.add_message(&"UI_BUILD_LEKHAN", "Inscribe")
+	en.add_message(&"UI_BUILD_GONG", "Gong")
+	en.add_message(&"UI_BUILD_SHELTER", "Shelter")
+	en.add_message(&"UI_BUILD_MEASURING_LINE", "Measuring line")
+	en.add_message(&"UI_BUILD_CHANT", "Chant")
+	var hi: Translation = Translation.new()
+	hi.locale = "hi"
+	hi.add_message(&"UI_BUILD_ROUTE", "मार्ग")
+	hi.add_message(&"UI_BUILD_CREWS", "दल")
+	hi.add_message(&"UI_BUILD_LEKHAN", "लेखन")
+	hi.add_message(&"UI_BUILD_GONG", "घंटा")
+	hi.add_message(&"UI_BUILD_SHELTER", "आश्रय")
+	hi.add_message(&"UI_BUILD_MEASURING_LINE", "माप की रस्सी")
+	hi.add_message(&"UI_BUILD_CHANT", "उद्घोष")
+	_translations = [en, hi]
+	for t: Translation in _translations:
+		TranslationServer.add_translation(t)
+
+
+func before_test() -> void:
+	_install_build_translations()
+
+
 func after_test() -> void:
 	TranslationServer.set_locale("en")
+	for t: Translation in _translations:
+		TranslationServer.remove_translation(t)
+	_translations.clear()
 
 
 func test_menu_lists_the_seven_contract_options() -> void:
@@ -136,20 +171,35 @@ func test_cancel_action_closes_the_menu() -> void:
 	assert_bool(menu.visible).is_false()
 
 
-func test_joypad_stick_push_selects_and_release_rearms() -> void:
+func test_menu_starts_closed() -> void:
+	var menu: BuildMenu = _make_menu()
+	assert_bool(menu.visible).is_false()
+
+
+func test_joypad_stick_sweep_updates_selection_while_held() -> void:
 	var menu: BuildMenu = _make_menu()
 	menu.open_at(Vector2(200.0, 200.0))
-	var motion: InputEventJoypadMotion = InputEventJoypadMotion.new()
-	motion.axis = JOY_AXIS_LEFT_X
-	motion.axis_value = 1.0
-	menu._unhandled_input(motion)
+	var stick_x: InputEventJoypadMotion = InputEventJoypadMotion.new()
+	stick_x.axis = JOY_AXIS_LEFT_X
+	stick_x.axis_value = 1.0
+	menu._unhandled_input(stick_x)
 	assert_str(String(menu.selected_id())).is_equal("lekhan")
 
-	# Release to the deadzone, then push left: the second push must select again.
-	motion.axis_value = 0.0
-	menu._unhandled_input(motion)
-	motion.axis_value = -1.0
-	menu._unhandled_input(motion)
+	# Sweep from right to up without releasing past the deadzone: the selection must follow the stick.
+	var stick_y: InputEventJoypadMotion = InputEventJoypadMotion.new()
+	stick_y.axis = JOY_AXIS_LEFT_Y
+	stick_y.axis_value = -1.0
+	menu._unhandled_input(stick_y)
+	assert_str(String(menu.selected_id())).is_equal("crews")
+	stick_x.axis_value = 0.0
+	menu._unhandled_input(stick_x)
+	assert_str(String(menu.selected_id())).is_equal("route")
+
+	# Re-push left after a release: the selection follows again.
+	stick_y.axis_value = 0.0
+	menu._unhandled_input(stick_y)
+	stick_x.axis_value = -1.0
+	menu._unhandled_input(stick_x)
 	assert_str(String(menu.selected_id())).is_equal("measuring_line")
 
 

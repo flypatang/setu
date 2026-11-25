@@ -4,6 +4,7 @@ extends Control
 ## control. Mouse: hover selects, click chooses. Gamepad: a left-stick or d-pad direction selects the
 ## option in that direction, the accept button chooses it, the cancel button closes the menu.
 ## Labels are translation keys UI_BUILD_<ID>.
+## The menu starts hidden. S20 owns the open trigger (right-click or shoulder button) and calls open_at().
 
 signal option_chosen(id: StringName)
 
@@ -16,11 +17,11 @@ var _radius: float = DEFAULT_RADIUS
 var _buttons: Array[Button] = []
 var _selected: int = 0
 var _stick: Vector2 = Vector2.ZERO
-var _stick_engaged: bool = false
 
 
 func _init() -> void:
 	mouse_filter = Control.MOUSE_FILTER_PASS
+	visible = false
 
 
 func _ready() -> void:
@@ -148,7 +149,6 @@ func close() -> void:
 
 func _reset_stick() -> void:
 	_stick = Vector2.ZERO
-	_stick_engaged = false
 
 
 func refresh_labels() -> void:
@@ -180,11 +180,7 @@ func _handle_stick(motion: InputEventJoypadMotion) -> void:
 	else:
 		return
 	if _stick.length() >= STICK_DEADZONE:
-		if not _stick_engaged:
-			_stick_engaged = true
-			select_direction(_stick)
-	else:
-		_stick_engaged = false
+		select_direction(_stick)
 
 
 func _on_button_hovered(index: int) -> void:
