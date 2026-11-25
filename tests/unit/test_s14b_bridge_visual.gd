@@ -198,3 +198,41 @@ func test_set_origin_x_moves_sections_already_built() -> void:
 	view.set_origin_x(35.0)
 	assert_float(view.get_section_root(0).position.x).is_equal_approx(35.0, 0.001)
 	assert_float(view.get_section_root(1).position.x).is_equal_approx(36.0, 0.001)
+
+
+func test_glyph_stays_inside_its_stone_footprint_in_x_and_z() -> void:
+	var view: BridgeView = _make_view()
+	view.sync(_complete_bridge(1))
+	var root: Node3D = view.get_section_root(0)
+	var stones: Array[MeshInstance3D] = _parts(root, "Stone")
+	var glyphs: Array[MeshInstance3D] = _parts(root, "Glyph")
+	for i: int in stones.size():
+		var stone: AABB = _part_aabb(stones[i])
+		var glyph: AABB = _part_aabb(glyphs[i])
+		assert_bool(glyph.position.x >= stone.position.x - TOL and glyph.end.x <= stone.end.x + TOL).is_true()
+		assert_bool(glyph.position.z >= stone.position.z - TOL and glyph.end.z <= stone.end.z + TOL).is_true()
+
+
+func test_glyphs_of_adjacent_sections_do_not_overlap_in_x() -> void:
+	var view: BridgeView = _make_view()
+	view.sync(_complete_bridge(2))
+	var root0: Node3D = view.get_section_root(0)
+	var root1: Node3D = view.get_section_root(1)
+	var glyph0: MeshInstance3D = _parts(root0, "Glyph")[0]
+	var glyph1: MeshInstance3D = _parts(root1, "Glyph")[0]
+	var end0: float = root0.position.x + _part_aabb(glyph0).end.x
+	var start1: float = root1.position.x + _part_aabb(glyph1).position.x
+	assert_bool(end0 <= start1 + TOL).is_true()
+
+
+func test_glyph_is_inside_its_stone_in_x_after_origin_offset() -> void:
+	var view: BridgeView = _make_view()
+	view.set_origin_x(12.0)
+	view.sync(_complete_bridge(1))
+	var root: Node3D = view.get_section_root(0)
+	var stone: AABB = _part_aabb(_parts(root, "Stone")[0])
+	var glyph: AABB = _part_aabb(_parts(root, "Glyph")[0])
+	var stone_start: float = root.position.x + stone.position.x
+	var glyph_start: float = root.position.x + glyph.position.x
+	assert_bool(glyph_start >= stone_start - TOL).is_true()
+	assert_bool(root.position.x + glyph.end.x <= root.position.x + stone.end.x + TOL).is_true()

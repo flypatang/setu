@@ -20,6 +20,9 @@ const STONE_DEPTH: float = 1.0
 const STONE_HEIGHT: float = 0.9
 const GLYPH_HEIGHT: float = 0.8
 const GLYPH_LIFT: float = 0.01
+## The glyph is 1.47 m wide at height 0.8 m (along x, the stone depth is 1.0 m), so it is squeezed to 0.88 m across x
+## to stay on its stone and clear of the neighbouring sections' glyphs.
+const GLYPH_WIDTH_SCALE: float = 0.6
 const PLANK_SIZE: Vector3 = Vector3(0.25, 0.1, SECTION_WIDTH)
 const PLANK_SPACING: float = 0.33
 const PLANK_HEIGHT: float = 0.5
@@ -125,7 +128,8 @@ func _key_of(s: Bridge.Section) -> String:
 
 ## Stones shown for a section: the sim's inscribed stones scaled onto the 6 stones across the section, rounded up.
 func _visible_stones(stone_in: int) -> int:
-	return mini(STONES_ACROSS, (stone_in * STONES_ACROSS + Bridge.STONE_PER_SECTION - 1) / Bridge.STONE_PER_SECTION)
+	var scaled: int = ceili(float(stone_in * STONES_ACROSS) / float(Bridge.STONE_PER_SECTION))
+	return mini(STONES_ACROSS, scaled)
 
 
 func _build_section(index: int, s: Bridge.Section) -> void:
@@ -169,6 +173,7 @@ func _add_glyph(parent: Node3D, z: float, k: int) -> void:
 	mi.material_override = _flat()
 	mi.position = Vector3(SECTION_CENTER_X, STONE_HEIGHT + GLYPH_LIFT, z)
 	mi.rotation_degrees = Vector3(-90.0, 0.0, 0.0)
+	mi.scale = Vector3(GLYPH_WIDTH_SCALE, 1.0, 1.0)
 	mi.name = "Glyph%d" % k
 	parent.add_child(mi)
 
