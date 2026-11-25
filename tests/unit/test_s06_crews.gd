@@ -298,3 +298,30 @@ func test_identical_runs_produce_identical_results() -> void:
 
 	assert_int(second_pile.count("rope")).is_equal(first_pile.count("rope"))
 	assert_int(second_pile.count("timber")).is_equal(first_pile.count("timber"))
+
+
+func test_morale_factor_property_can_be_set_directly() -> void:
+	var crews: Crews = _make_crews(1)
+	var pile: Stockpile = _make_pile(1000)
+	crews.register_site(&"quarry", pile, &"cutter")
+	crews.assign(&"cutter", &"quarry", 1)
+	assert_float(crews.morale_factor as float).is_equal_approx(1.0, 0.001)
+	crews.morale_factor = 1.3
+	_run(crews, 100)
+	assert_int(pile.count("stone")).is_equal(6)
+
+
+func test_snapshot_round_trips() -> void:
+	var crews: Crews = _make_crews(6)
+	crews.register_site(&"quarry", _make_pile(1000), &"cutter")
+	crews.register_site(&"forest", _make_pile(1000), &"lumberjack")
+	crews.assign(&"cutter", &"quarry", 2)
+	crews.assign(&"lumberjack", &"forest", 3)
+	_run(crews, 7)
+	var saved: Dictionary = crews.snapshot()
+	var copy: Crews = _make_crews(0)
+	copy.register_site(&"quarry", _make_pile(1000), &"cutter")
+	copy.register_site(&"forest", _make_pile(1000), &"lumberjack")
+	copy.restore(saved)
+	assert_bool(copy.snapshot() == saved).is_true()
+	assert_int(copy.free_crews()).is_equal(1)

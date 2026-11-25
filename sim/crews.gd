@@ -18,7 +18,7 @@ var _site_order: Array[StringName] = []
 var _assigned: Dictionary = {}
 var _progress: Dictionary = {}
 ## Morale factor: a float, or a Callable returning a float that is read on every step. Default 1.0.
-var _morale: Variant = 1.0
+var morale_factor: Variant = 1.0
 
 
 func _init(initial_total: int = 0) -> void:
@@ -92,7 +92,7 @@ func unassign(role: StringName, site_id: StringName, crews: int) -> int:
 
 
 func set_morale_factor(factor: Variant) -> void:
-	_morale = factor
+	morale_factor = factor
 
 
 ## Advances every site by one tick. Production is fractional per tick and converted to whole units in the pile.
@@ -154,11 +154,11 @@ func _site_has_role(site_id: StringName, role: StringName) -> bool:
 
 
 func _morale_value() -> float:
-	if typeof(_morale) == TYPE_CALLABLE:
-		var callback: Callable = _morale as Callable
+	if typeof(morale_factor) == TYPE_CALLABLE:
+		var callback: Callable = morale_factor as Callable
 		var raw: Variant = callback.call()
 		return maxf(_to_float(raw), 0.0)
-	return maxf(_to_float(_morale), 0.0)
+	return maxf(_to_float(morale_factor), 0.0)
 
 
 func _to_float(value: Variant) -> float:
