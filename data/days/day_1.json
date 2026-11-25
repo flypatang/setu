@@ -74,5 +74,27 @@
       "id": "sunset_near",
       "dialogue": "advisor#sadv_nala_bless"
     }
-  ]
+  ],
+  "resource_nodes": {
+    "quarry": [
+      [
+        -60.0,
+        -30.0
+      ],
+      [
+        -75.0,
+        -18.0
+      ]
+    ],
+    "forest": [
+      [
+        -60.0,
+        40.0
+      ],
+      [
+        -48.0,
+        54.0
+      ]
+    ]
+  }
 }

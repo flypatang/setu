@@ -79,5 +79,27 @@
       "id": "vignette",
       "dialogue": "vignette_squirrel"
     }
-  ]
+  ],
+  "resource_nodes": {
+    "quarry": [
+      [
+        -70.0,
+        -40.0
+      ],
+      [
+        -85.0,
+        -28.0
+      ]
+    ],
+    "forest": [
+      [
+        -65.0,
+        50.0
+      ],
+      [
+        -53.0,
+        64.0
+      ]
+    ]
+  }
 }

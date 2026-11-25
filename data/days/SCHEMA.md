@@ -34,3 +34,10 @@ file at a given node (for example `advisor#sadv_nala_align`, a single advisor li
 Each day builds its own `Bridge` starting at local x = 0. The game layer keeps the total built so far and offsets that
 day's BridgeView and the bridge head by the cumulative length, so the bridge reads as one continuous structure.
 Creature zones (`x_from`, `x_to`) are in the day's local coordinates.
+
+## Resource nodes (balance rule, S25)
+`resource_nodes: {"quarry": [[x,z],...], "forest": [[x,z],...]}`. Stone can only be cut, and timber only felled, at
+these places: cutter and lumberjack crews may only be assigned to piles within 15 m of a node of the matching kind, and
+`build_station` for a `quarry` or `forest` pile must be within 15 m of such a node. The scribes (`lekhan`) and the
+rope-works may be built anywhere on the shore (x < 0). This keeps hauling a real problem instead of letting every
+station sit at the bridge head.

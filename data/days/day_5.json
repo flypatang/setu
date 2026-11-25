@@ -65,9 +65,9 @@
   ],
   "creatures": [
     {
-      "x_from": 100,
-      "x_to": 120,
-      "active_until": 2400,
+      "x_from": 60,
+      "x_to": 95,
+      "active_until": 5200,
       "kind": "makara"
     }
   ],
@@ -87,5 +87,27 @@
       "id": "finale",
       "dialogue": "finale"
     }
-  ]
+  ],
+  "resource_nodes": {
+    "quarry": [
+      [
+        -90.0,
+        -40.0
+      ],
+      [
+        -105.0,
+        -28.0
+      ]
+    ],
+    "forest": [
+      [
+        -80.0,
+        60.0
+      ],
+      [
+        -68.0,
+        74.0
+      ]
+    ]
+  }
 }

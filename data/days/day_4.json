@@ -59,15 +59,15 @@
   "storms": [],
   "creatures": [
     {
-      "x_from": 60,
-      "x_to": 90,
-      "active_until": 3600,
+      "x_from": 40,
+      "x_to": 75,
+      "active_until": 6400,
       "kind": "makara"
     },
     {
-      "x_from": 140,
-      "x_to": 170,
-      "active_until": 7800,
+      "x_from": 120,
+      "x_to": 160,
+      "active_until": 8600,
       "kind": "fish"
     }
   ],
@@ -87,5 +87,27 @@
       "id": "sunset_near",
       "dialogue": "advisor#sadv_nala_bless"
     }
-  ]
+  ],
+  "resource_nodes": {
+    "quarry": [
+      [
+        -85.0,
+        -45.0
+      ],
+      [
+        -100.0,
+        -33.0
+      ]
+    ],
+    "forest": [
+      [
+        -75.0,
+        55.0
+      ],
+      [
+        -63.0,
+        69.0
+      ]
+    ]
+  }
 }
