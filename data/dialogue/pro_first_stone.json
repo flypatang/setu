@@ -1,0 +1,19 @@
+{
+ "id": "pro_first_stone",
+ "start": "n1",
+ "nodes": {
+  "n1": {
+   "speaker": "narrator",
+   "text_key": "SDLG_FS_001",
+   "next": "n2"
+  },
+  "n2": {
+   "speaker": "nila",
+   "text_key": "SDLG_FS_002",
+   "next": null,
+   "set_flags": {
+    "prologue_done": true
+   }
+  }
+ }
+}

@@ -1,0 +1,15 @@
+{
+ "id": "day1_intro",
+ "start": "n1",
+ "nodes": {
+  "n1": {
+   "speaker": "narrator",
+   "text_key": "SDLG_D1_001",
+   "next": "n2"
+  },
+  "n2": {
+   "shloka": "yk_aham_setum",
+   "next": null
+  }
+ }
+}

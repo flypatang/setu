@@ -1,0 +1,11 @@
+{
+ "id": "day4_intro",
+ "start": "n1",
+ "nodes": {
+  "n1": {
+   "speaker": "narrator",
+   "text_key": "SDLG_D4_001",
+   "next": null
+  }
+ }
+}

@@ -1,0 +1,36 @@
+{
+ "id": "advisor",
+ "start": "sadv_nala_align",
+ "nodes": {
+  "sadv_nala_align": {
+   "speaker": "nala",
+   "text_key": "SADV_NALA_ALIGN",
+   "next": null
+  },
+  "sadv_nala_sink": {
+   "speaker": "nala",
+   "text_key": "SADV_NALA_SINK",
+   "next": null
+  },
+  "sadv_nala_bless": {
+   "speaker": "nala",
+   "text_key": "SADV_NALA_BLESS",
+   "next": null
+  },
+  "sadv_nila_crowd": {
+   "speaker": "nila",
+   "text_key": "SADV_NILA_CROWD",
+   "next": null
+  },
+  "sadv_nila_morale": {
+   "speaker": "nila",
+   "text_key": "SADV_NILA_MORALE",
+   "next": null
+  },
+  "sadv_nila_idle": {
+   "speaker": "nila",
+   "text_key": "SADV_NILA_IDLE",
+   "next": null
+  }
+ }
+}

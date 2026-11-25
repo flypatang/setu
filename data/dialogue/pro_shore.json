@@ -1,0 +1,50 @@
+{
+ "id": "pro_shore",
+ "start": "n1",
+ "nodes": {
+  "n1": {
+   "speaker": "narrator",
+   "text_key": "SDLG_PRO_001",
+   "next": "n2"
+  },
+  "n2": {
+   "speaker": "vibhishana",
+   "text_key": "SDLG_PRO_002",
+   "next": "n3"
+  },
+  "n3": {
+   "speaker": "narrator",
+   "text_key": "SDLG_PRO_003",
+   "next": "n4"
+  },
+  "n4": {
+   "speaker": "rama",
+   "text_key": "SDLG_PRO_004",
+   "next": "n5"
+  },
+  "n5": {
+   "speaker": "narrator",
+   "text_key": "SDLG_PRO_005",
+   "next": "n6"
+  },
+  "n6": {
+   "speaker": "samudra",
+   "text_key": "SDLG_PRO_006",
+   "next": "n7"
+  },
+  "n7": {
+   "shloka": "yk_nala_son_of_vishwakarma",
+   "next": "n8"
+  },
+  "n8": {
+   "speaker": "nala",
+   "text_key": "SDLG_PRO_008",
+   "next": "n9"
+  },
+  "n9": {
+   "speaker": "narrator",
+   "text_key": "SDLG_PRO_009",
+   "next": null
+  }
+ }
+}

@@ -1,0 +1,40 @@
+keys,en,hi
+SPK_NARRATOR,Narrator,सूत्रधार
+SPK_RAMA,Rama,राम
+SPK_LAKSHMANA,Lakshmana,लक्ष्मण
+SPK_VIBHISHANA,Vibhishana,विभीषण
+SPK_SAMUDRA,Samudra,समुद्र
+SPK_NALA,Nala,नल
+SPK_NILA,Nila,नील
+SPK_SUGRIVA,Sugriva,सुग्रीव
+SPK_HANUMAN,Hanuman,हनुमान
+SPK_SQUIRREL,Little Squirrel,नन्ही गिलहरी
+SDLG_PRO_001,The vanara army stands on the southern shore. Hanuman has brought news of Sita — but a hundred yojanas of ocean still lie between Rama and Lanka.,वानर सेना दक्षिणी तट पर खड़ी है। हनुमान सीता का समाचार ले आए हैं — पर श्रीराम और लंका के बीच अब भी सौ योजन का समुद्र है।
+SDLG_PRO_002,"""Raghava, the Ocean is bound to your family — your ancestor Sagara dug its depths. Ask Samudra himself for a way across.""","""राघव, समुद्र आपके कुल का ऋणी है — आपके पूर्वज सगर के पुत्रों ने ही इसे खोदा था। स्वयं समुद्रदेव से मार्ग माँगिए।"""
+SDLG_PRO_003,"Rama spreads kusha grass upon the shore and lies there in silent prayer. One night passes, then two, then three. The Ocean does not appear.","श्रीराम तट पर कुश बिछाकर मौन प्रार्थना में लेट जाते हैं। एक रात बीतती है, फिर दूसरी, फिर तीसरी। समुद्र प्रकट नहीं होता।"
+SDLG_PRO_004,"""Gentleness is mistaken for weakness. Lakshmana, bring my bow.""","""विनम्रता को दुर्बलता समझा जा रहा है। लक्ष्मण, मेरा धनुष लाओ।"""
+SDLG_PRO_005,"As Rama draws the bow, the sea boils and the sky darkens. From the depths rises Samudra, crowned with jewels, his hands joined.","जैसे ही श्रीराम धनुष खींचते हैं, समुद्र खौल उठता है और आकाश अंधकारमय हो जाता है। गहराइयों से रत्नों का मुकुट धारण किए, हाथ जोड़े समुद्रदेव प्रकट होते हैं।"
+SDLG_PRO_006,"""Raghava, it is my nature to be deep and impassable; I cannot change it. But let Nala, son of Vishwakarma, build a bridge — and I will bear it upon my waters.""","""राघव, गहरा और अगम्य होना मेरा स्वभाव है; उसे मैं बदल नहीं सकता। पर विश्वकर्मा के पुत्र नल सेतु बनाएँ — मैं उसे अपने जल पर धारण करूँगा।"""
+SDLG_PRO_008,"""Lord, I will build it. But let every stone carry your name, so that the Ocean's promise and your name hold it together.""","""प्रभु, मैं इसे बनाऊँगा। पर हर पत्थर पर आपका नाम लिखा जाए, ताकि समुद्र का वचन और आपका नाम मिलकर इसे थामे रहें।"""
+SDLG_PRO_009,"Write ""राम"" on the first stone at the scribes' station, then carry it to the water.","लेखन-स्थल पर पहले पत्थर पर ""राम"" लिखें, फिर उसे जल तक ले जाएँ।"
+SDLG_FS_001,"Nala sets the stone marked ""राम"" upon the waves. It rocks once — and floats.","नल ""राम"" लिखा पत्थर लहरों पर रखते हैं। वह एक बार डोलता है — और तैरने लगता है।"
+SDLG_FS_002,"""Jaya Shri Ram! Vanaras — to the mountains and forests! Bring every stone and every tree!""","""जय श्रीराम! वानरों — पर्वतों और वनों की ओर! हर पत्थर, हर वृक्ष ले आओ!"""
+SDLG_D1_001,Day one. Nala marks the line; Nila sends the crews to the quarries and forests. Today's target: 14 yojanas.,पहला दिन। नल रेखा अंकित करते हैं; नील दलों को खदानों और वनों में भेजते हैं। आज का लक्ष्य: 14 योजन।
+SDLG_D2_001,Day two. The currents grow stronger away from the shore. Use measuring lines to keep the bridge straight. Target: 20 yojanas.,दूसरा दिन। तट से दूर धाराएँ प्रबल होती जाती हैं। सेतु को सीधा रखने के लिए माप की रस्सियों का उपयोग करें। लक्ष्य: 20 योजन।
+SDLG_D3_001,Day three. Work continues into the night by torchlight. A squall is coming at midday. Target: 21 yojanas.,तीसरा दिन। मशालों के प्रकाश में रात तक काम चलता है। दोपहर में आँधी आने वाली है। लक्ष्य: 21 योजन।
+SDLG_D4_001,Day four. Makaras stir in the deep water. Ring the gongs to drive them off. Target: 22 yojanas.,चौथा दिन। गहरे जल में मकर हलचल कर रहे हैं। उन्हें भगाने के लिए घंटे बजाएँ। लक्ष्य: 22 योजन।
+SDLG_D5_001,Day five. Lanka is in sight — and a great storm is gathering. Target: 23 yojanas.,पाँचवाँ दिन। लंका दिखाई दे रही है — और एक भीषण तूफ़ान घिर रहा है। लक्ष्य: 23 योजन।
+SDLG_SQ_001,"Among the mighty vanaras, a little squirrel hurries back and forth from the shore.",शक्तिशाली वानरों के बीच एक नन्ही गिलहरी तट से बार-बार आती-जाती है।
+SDLG_SQ_002,"""I cannot carry stones. But I can roll in the sand and shake it between them, so the gaps are filled.""","""मैं पत्थर नहीं उठा सकती। पर रेत में लोटकर उसे पत्थरों के बीच झाड़ सकती हूँ, जिससे दरारें भर जाएँ।"""
+SDLG_SQ_003,"""Out of the way, little one! You'll be crushed.""","""हट जाओ, नन्ही! कुचल जाओगी।"""
+SDLG_SQ_004,"""Wait. Her love is no smaller than yours. Every offering made with devotion is great.""","""ठहरो। इसका प्रेम तुम्हारे प्रेम से छोटा नहीं। भक्ति से किया गया हर अर्पण महान है।"""
+SDLG_SQ_005,"Rama lifts the squirrel and gently strokes her back with three fingers. To this day, the folk tale says, squirrels carry those three stripes.",श्रीराम गिलहरी को उठाकर तीन उँगलियों से उसकी पीठ सहलाते हैं। लोककथा कहती है कि आज तक गिलहरियाँ वे तीन धारियाँ धारण करती हैं।
+SADV_NALA_ALIGN,"""That section is drifting off the line. Lay a measuring line — the current will bend anything crooked.""","""वह भाग रेखा से हट रहा है। माप की रस्सी डालो — धारा हर टेढ़ी चीज़ को मोड़ देगी।"""
+SADV_NALA_SINK,"""A stone without Rama's name sank! Every stone must pass through the scribes first.""","""बिना श्रीराम के नाम का पत्थर डूब गया! हर पत्थर पहले लेखकों के पास से होकर जाए।"""
+SADV_NALA_BLESS,"""The sun sets. Whatever we finished today, the Ocean now holds forever.""","""सूर्य अस्त हो रहा है। आज जो पूरा हुआ, उसे अब समुद्र सदा के लिए धारण करेगा।"""
+SADV_NILA_CROWD,"""Too many on one path — they're tripping over each other. Draw a second route.""","""एक ही मार्ग पर बहुत भीड़ है — सब एक-दूसरे से टकरा रहे हैं। दूसरा मार्ग बनाओ।"""
+SADV_NILA_MORALE,"""The army is tiring. A chant of 'Jaya Shri Ram' will lift their hearts!""","""सेना थक रही है। 'जय श्रीराम' का उद्घोष उनका उत्साह बढ़ा देगा!"""
+SADV_NILA_IDLE,"""Some crews are standing idle. Put them to work!""","""कुछ दल खाली खड़े हैं। उन्हें काम पर लगाओ!"""
+SDLG_FIN_001,"On the fifth evening, the last stone marked ""राम"" touches the shore of Lanka. The bridge stretches a hundred yojanas across the sea.","पाँचवें दिन की संध्या को ""राम"" लिखा अंतिम पत्थर लंका के तट को छूता है। सेतु समुद्र पर सौ योजन तक फैला है।"
+SDLG_FIN_002,Gods and sages gather in the sky to see the wonder. The army of Rama begins to cross.,इस अद्भुत दृश्य को देखने देवता और ऋषि आकाश में एकत्र होते हैं। श्रीराम की सेना पार उतरने लगती है।
+SDLG_FIN_003,"""Nala, Nila — and every one of you, down to the smallest — this bridge is your devotion made into stone.""","""नल, नील — और तुम सब, छोटे से छोटे तक — यह सेतु पत्थर में ढली तुम्हारी भक्ति है।"""

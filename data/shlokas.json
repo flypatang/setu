@@ -1,0 +1,31 @@
+{
+  "_note": "Drafted from memory; MUST be checked against valmiki.iitk.ac.in (Yuddha Kanda sarga 22) and verified_by filled before release.",
+  "shlokas": [
+    {
+      "id": "yk_nala_son_of_vishwakarma",
+      "moment": "samudra_promise",
+      "ref": "Yuddha Kanda 6.22 (verse number to verify)",
+      "devanagari": "अयं सौम्य नलो नाम तनुजो विश्वकर्मणः ।\nपित्रा दत्तवरः श्रीमान्प्रीतिमान्विश्वकर्मणः ॥",
+      "iast": "ayaṃ saumya nalo nāma tanujo viśvakarmaṇaḥ |\npitrā dattavaraḥ śrīmān prītimān viśvakarmaṇaḥ ||",
+      "translation": {
+        "en": "Gentle one, this is Nala, son of Vishwakarma. Glorious and beloved of his father, he has received a boon from him.",
+        "hi": "हे सौम्य, यह नल नाम का वानर विश्वकर्मा का पुत्र है। यह तेजस्वी है और पिता का प्रिय है; इसे पिता से वर प्राप्त है।"
+      },
+      "verified_by": "",
+      "verified_on": ""
+    },
+    {
+      "id": "yk_aham_setum",
+      "moment": "day1_start",
+      "ref": "Yuddha Kanda 6.22 (verse number to verify)",
+      "devanagari": "अहं सेतुं करिष्यामि विस्तीर्णे वरुणालये ।\nपितुः सामर्थ्यमास्थाय तत्त्वमाह महोदधिः ॥",
+      "iast": "ahaṃ setuṃ kariṣyāmi vistīrṇe varuṇālaye |\npituḥ sāmarthyam āsthāya tattvam āha mahodadhiḥ ||",
+      "translation": {
+        "en": "I will build a bridge across the vast abode of Varuna, relying on my father's power. The great Ocean has spoken the truth.",
+        "hi": "मैं पिता के सामर्थ्य का आश्रय लेकर वरुण के इस विशाल निवास (समुद्र) पर सेतु बनाऊँगा। महासागर ने सत्य कहा है।"
+      },
+      "verified_by": "",
+      "verified_on": ""
+    }
+  ]
+}

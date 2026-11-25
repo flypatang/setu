@@ -1,0 +1,24 @@
+{
+ "id": "finale",
+ "start": "n1",
+ "nodes": {
+  "n1": {
+   "speaker": "narrator",
+   "text_key": "SDLG_FIN_001",
+   "next": "n2"
+  },
+  "n2": {
+   "speaker": "narrator",
+   "text_key": "SDLG_FIN_002",
+   "next": "n3"
+  },
+  "n3": {
+   "speaker": "rama",
+   "text_key": "SDLG_FIN_003",
+   "next": null,
+   "set_flags": {
+    "game_complete": true
+   }
+  }
+ }
+}
