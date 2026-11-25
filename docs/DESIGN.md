@@ -1,4 +1,4 @@
-# Setu — The Bridge to Lanka (Design Document v0.1)
+# Setu — The Bridge to Lanka (Design Document v0.2)
 
 > Status: **DRAFT.** Written by the design agent (Opus). This is the second game from the factory and a sequel to *Hanumaan*.
 > It follows the same conventions as `flypatang/hanumaan/docs/DESIGN.md` (rules for coding agents, quality gates,
@@ -33,21 +33,28 @@ you lead the vanara army in building a bridge **100 yojanas** long across the oc
 majestic, not a monster. **No combat with Samudra.** Sea creatures are hazards of nature, not enemies to kill. You
 drive them away with noise or light, or work around them.
 
-**Later traditions (owner decision, see §11):** the stones marked "राम" that float, and the little squirrel who helps
-(*gilahari*), come from later retellings (for example the Ramcharitmanas and folk tradition), not from Valmiki.
-**Proposal:** keep Valmiki's explanation (Samudra's promise and Nala's skill) as the core mechanic, and include the
-squirrel as an optional, clearly separate "folk tale" vignette. Waiting on the owner.
+**Valmiki and the folk tradition combined (owner decision 2026-11-26):** Valmiki's account is the frame: Samudra
+promises to hold up what Nala builds. The popular tradition is shown **visibly and centrally**: every stone is inscribed
+with **"राम"** before it goes into the sea, and **the inscribed stones float**. The two fit together in the story:
+Samudra's promise is honoured *through* Rama's name. The little **squirrel (gilahari)** appears as a folk-tale
+vignette (see §3). Every shloka is still quoted from Valmiki (§7). Folk elements are shown in scenes and gameplay,
+never presented as Valmiki verses.
+
+**Nala and Nila (owner decision 2026-11-26):** both brothers are foremen. **Nala** is the chief architect (as in
+Valmiki), in charge of design and alignment at the bridge head. **Nila**, commander of the vanara army, runs the crews,
+hauling and morale. Folk vignette: as boys, both were blessed (or playfully cursed) by sages so that whatever they threw into water would float.
 
 ## 3. Structure
 
 | Level | Day | Target (yojanas) | New mechanic | Hazard |
 |---|---|---|---|---|
-| Prologue | — | — | Camera, selection, the first haul line | — |
+| Prologue | — | — | Camera, selection, the first haul line, **inscribing the first stone with "राम"** (Rama watches) | — |
 | Day 1 | 1 | 14 | Forests and quarries, haul chains, laying sections | Gentle tides |
 | Day 2 | 2 | 20 (34 total) | **Measuring lines** (alignment bonus), mixed foundations | Cross-currents bend unaligned sections |
 | Day 3 | 3 | 21 (55 total) | **Night shift** (torches, lower morale), crew roles | Squall at midday |
 | Day 4 | 4 | 22 (77 total) | **Sea creatures** (makara, giant fish): sound gongs and use conch signals | A pod of makaras |
 | Day 5 | 5 | 23 (100 total) | Everything; time pressure; Rama's arrival adds morale | A great storm at the finish |
+| Vignette | between Days 2 and 3 | — | **The squirrel:** play a short scene as a little squirrel rolling in sand and shaking it onto the bridge. Rama strokes its back, leaving three stripes. | — |
 | Free Build | — | — | A sandbox with all tools and no timer | Hazards you can toggle |
 
 Each "day" is about 8–12 minutes of game time and is scored for length, alignment, material efficiency and morale.
@@ -59,9 +66,11 @@ story never fails: Nala always finishes, but the score and the cutscene's tone c
 ### 4.1 Resources
 - **Stone** (from quarries: slow to cut, heavy, strong), **Timber** (from forests: fast, light, needs lashing),
   **Rope** (made from bark and grass at rope-works; needed for lashing and measuring lines).
+- **Inscribed Stone:** at **Lekhan** stations (scribe crews), stones are painted with "राम". **Only inscribed stones float.** An uninscribed stone placed in the sea sinks and is wasted, which makes the inscription step a real logistics stage. The "राम" lettering is always rendered legibly on the stone mesh (a decal or vertex-coloured glyph), including in crowd shots at mid zoom.
 - **Foundation** sections need Stone ≥ 60%. **Deck** sections need Timber ≥ 40% and Rope.
 
 ### 4.2 Crews (vanaras)
+- **Scribes** at Lekhan stations inscribe stones (throughput is a balancing lever).
 - **Haulers** form chains along a drawn route (a spline). Throughput = hauler count × speed ÷ route length, with
   bottlenecks at the narrowest point. Hauling **passes items hand to hand**, so it reads visually as a stream of goods.
 - **Cutters** at quarries and forests, **Lashers** at rope-works, and **Builders** at the bridge head (Nala's team).
@@ -84,6 +93,8 @@ story never fails: Nala always finishes, but the score and the cutscene's tone c
   area of sea; drive them away with gong towers or work around them).
 
 ## 5. Controls
+**Nala and Nila as advisors:** Nala's hints are about the bridge (alignment, sturdiness); Nila's are about crews and morale.
+
 Mouse: left-click to select or place, right-drag to rotate the camera (in 90° snaps), wheel to zoom, and a radial build
 menu on right-click. Gamepad: cursor on the left stick, radial menu on the shoulder buttons. Time controls: pause, 1×, 2× and 3×.
 
@@ -131,11 +142,11 @@ army's crossing.
 As in Hanumaan §10, plus: **Gate S (simulation):** the bot must finish Day 1 with a ≥ 90% score at 3× speed within 60 s of
 wall time, and the same seed with the same inputs must produce an identical bridge (a hash of the simulation state).
 
-## 11. Open questions for the owner
-1. **Later traditions:** should the stones marked "राम" float, and should the squirrel appear (§2)? This also affects
-   Hanumaan's teaser, which currently shows a floating "राम" stone. Options:
-   (a) Valmiki only (the teaser shows Samudra's promise instead);
-   (b) Valmiki core plus clearly labelled folk-tradition vignettes (recommended);
-   (c) the popular telling throughout.
-2. Should Nala's partner **Nila** appear as a second foreman (in some tellings both build), or should it stay Nala only, as Valmiki has it?
-3. Should Free Build mode be in the first release?
+## 11. Owner decisions
+| Date | Decision |
+|---|---|
+| 2026-11-26 | Combine Valmiki and the folk tradition: stones inscribed with "राम" float, and this is shown prominently; the squirrel is a vignette (§2, §3, §4.1). |
+| 2026-11-26 | Nala and Nila both appear as foremen (§2). |
+
+## 12. Open questions for the owner
+1. Free Build mode (§3): should it be in the first release, or added in a later update?
