@@ -103,3 +103,79 @@ func test_labels_use_translation_keys_and_translate() -> void:
 		assert_str(menu.label_text(i)).is_equal(expected)
 		assert_bool(expected == "UI_BUILD_" + id.to_upper()).is_false()
 	assert_str(menu.label_text(0)).is_equal("मार्ग")
+
+
+func test_gamepad_diagonal_and_bottom_directions_select_their_options() -> void:
+	var menu: BuildMenu = _make_menu()
+	menu.select_direction(Vector2(1.0, -1.0))
+	assert_str(String(menu.selected_id())).is_equal("crews")
+	menu.select_direction(Vector2(-1.0, -1.0))
+	assert_str(String(menu.selected_id())).is_equal("chant")
+	menu.select_direction(Vector2.DOWN)
+	var down_index: int = menu.selected_index()
+	assert_bool(down_index == 3 or down_index == 4).is_true()
+	assert_float(menu.option_direction(down_index).y).is_greater(0.8)
+
+
+func test_shelter_and_chant_are_laid_out_and_selectable() -> void:
+	var menu: BuildMenu = _make_menu()
+	menu.select_direction(menu.option_direction(4))
+	assert_str(String(menu.selected_id())).is_equal("shelter")
+	menu.select_direction(menu.option_direction(6))
+	assert_str(String(menu.selected_id())).is_equal("chant")
+
+
+func test_cancel_action_closes_the_menu() -> void:
+	var menu: BuildMenu = _make_menu()
+	menu.open_at(Vector2(200.0, 200.0))
+	assert_bool(menu.visible).is_true()
+	var cancel: InputEventAction = InputEventAction.new()
+	cancel.action = &"ui_cancel"
+	cancel.pressed = true
+	menu._unhandled_input(cancel)
+	assert_bool(menu.visible).is_false()
+
+
+func test_joypad_stick_push_selects_and_release_rearms() -> void:
+	var menu: BuildMenu = _make_menu()
+	menu.open_at(Vector2(200.0, 200.0))
+	var motion: InputEventJoypadMotion = InputEventJoypadMotion.new()
+	motion.axis = JOY_AXIS_LEFT_X
+	motion.axis_value = 1.0
+	menu._unhandled_input(motion)
+	assert_str(String(menu.selected_id())).is_equal("lekhan")
+
+	# Release to the deadzone, then push left: the second push must select again.
+	motion.axis_value = 0.0
+	menu._unhandled_input(motion)
+	motion.axis_value = -1.0
+	menu._unhandled_input(motion)
+	assert_str(String(menu.selected_id())).is_equal("measuring_line")
+
+
+func test_stick_state_is_reset_on_reopen() -> void:
+	var menu: BuildMenu = _make_menu()
+	menu.open_at(Vector2(200.0, 200.0))
+	var motion: InputEventJoypadMotion = InputEventJoypadMotion.new()
+	motion.axis = JOY_AXIS_LEFT_X
+	motion.axis_value = 1.0
+	menu._unhandled_input(motion)
+	# Stick still held when the menu closes.
+	menu.close()
+	menu.open_at(Vector2(200.0, 200.0))
+	menu._unhandled_input(motion)
+	assert_str(String(menu.selected_id())).is_equal("lekhan")
+
+
+func test_open_near_edge_keeps_the_circle_inside_the_viewport() -> void:
+	var menu: BuildMenu = _make_menu()
+	var viewport_rect: Rect2 = menu.get_viewport_rect()
+	menu.open_at(viewport_rect.position)
+	var centre: Vector2 = menu.global_position + menu.size * 0.5
+	var extent: Vector2 = Vector2(BuildMenu.DEFAULT_RADIUS, BuildMenu.DEFAULT_RADIUS) + BuildMenu.BUTTON_SIZE * 0.5
+	assert_float(centre.x - extent.x).is_greater_equal(viewport_rect.position.x - 0.01)
+	assert_float(centre.y - extent.y).is_greater_equal(viewport_rect.position.y - 0.01)
+	menu.open_at(viewport_rect.end)
+	centre = menu.global_position + menu.size * 0.5
+	assert_float(centre.x + extent.x).is_less_equal(viewport_rect.end.x + 0.01)
+	assert_float(centre.y + extent.y).is_less_equal(viewport_rect.end.y + 0.01)

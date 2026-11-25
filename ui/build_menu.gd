@@ -127,14 +127,28 @@ func confirm_selection() -> void:
 	close()
 
 
+## Opens the menu centred on `screen_position` (global viewport coordinates), keeping the whole circle of
+## options inside the viewport. Stick state is reset so a stick held across close/open does not swallow a push.
 func open_at(screen_position: Vector2) -> void:
-	position = screen_position - size * 0.5
+	_reset_stick()
+	var half_extent: Vector2 = Vector2(_radius, _radius) + BUTTON_SIZE * 0.5
+	var viewport_rect: Rect2 = get_viewport_rect()
+	var min_centre: Vector2 = viewport_rect.position + half_extent
+	var max_centre: Vector2 = viewport_rect.end - half_extent
+	var centre: Vector2 = screen_position.clamp(min_centre, max_centre)
+	global_position = centre - size * 0.5
 	_select(0)
 	visible = true
 
 
 func close() -> void:
+	_reset_stick()
 	visible = false
+
+
+func _reset_stick() -> void:
+	_stick = Vector2.ZERO
+	_stick_engaged = false
 
 
 func refresh_labels() -> void:
