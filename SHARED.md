@@ -1,6 +1,6 @@
 # Shared code from Hanumaan
 
-These files are copied from [flypatang/hanumaan](https://github.com/flypatang/hanumaan) at commit `14dc463`, with their tests.
+These files are copied from [flypatang/hanumaan](https://github.com/flypatang/hanumaan) at commit `42bd309`, with their tests.
 Fix bugs in Hanumaan first, then copy them over again. Once both games ship, the factory will move them into a shared addon.
 
 | File | Hanumaan module | Local changes |

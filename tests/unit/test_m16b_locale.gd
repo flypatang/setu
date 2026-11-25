@@ -104,18 +104,30 @@ func test_every_key_has_non_empty_en_and_hi() -> void:
 
 
 func test_font_for_ui_uses_devanagari_then_latin_fallback() -> void:
-	var locale: Node = _make_locale()
+	var locale: Node = auto_free((load("res://core/locale.gd") as GDScript).new()) as Node
 	var font: Font = locale.call("font_for", &"ui") as Font
 	assert_object(font).is_not_null()
-	var system_font: SystemFont = font as SystemFont
-	assert_object(system_font).is_not_null()
-	assert_bool(Array(system_font.font_names).has("Noto Sans Devanagari")).is_true()
-	assert_bool(Array(system_font.font_names).has("Noto Sans")).is_true()
+	# Devanagari and Latin (with IAST diacritics) must both have glyphs through the font or its fallbacks.
+	assert_bool(_renders(font, "राम")).is_true()
+	assert_bool(_renders(font, "Hanuman ś ā ṃ")).is_true()
 
 
 func test_font_for_shloka_uses_serif_devanagari() -> void:
-	var locale: Node = _make_locale()
+	var locale: Node = auto_free((load("res://core/locale.gd") as GDScript).new()) as Node
 	var font: Font = locale.call("font_for", &"shloka") as Font
-	var system_font: SystemFont = font as SystemFont
-	assert_object(system_font).is_not_null()
-	assert_bool(Array(system_font.font_names).has("Noto Serif Devanagari")).is_true()
+	assert_object(font).is_not_null()
+	assert_str(font.get_font_name()).contains("Serif")
+	assert_bool(_renders(font, "श्लोकः")).is_true()
+
+
+func _renders(font: Font, text: String) -> bool:
+	for i: int in text.length():
+		var ch: int = text.unicode_at(i)
+		if ch == 32:
+			continue
+		var ok: bool = font.has_char(ch)
+		for fb: Font in font.fallbacks:
+			ok = ok or fb.has_char(ch)
+		if not ok:
+			return false
+	return true

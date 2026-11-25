@@ -39,13 +39,40 @@ func set_language(code: StringName) -> void:
 	language_changed.emit(StringName(text))
 
 
+## Bundled Noto fonts (SIL OFL, fonts/OFL.txt) with fallbacks, so Devanagari and IAST diacritics always render.
+## ui: Noto Sans Devanagari, then Noto Sans. shloka: Noto Serif Devanagari, then Noto Sans.
+## Falls back to a SystemFont by name if the bundled files are missing.
+const FONT_FILES: Dictionary = {
+	"ui": ["res://fonts/NotoSansDevanagari.ttf", "res://fonts/NotoSans.ttf"],
+	"shloka": ["res://fonts/NotoSerifDevanagari.ttf", "res://fonts/NotoSans.ttf"],
+}
+
+
 func font_for(role: StringName) -> Font:
 	var key: String = str(role)
 	if not _fonts.has(key):
-		var font: SystemFont = SystemFont.new()
-		font.font_names = _font_names_for(key)
-		_fonts[key] = font
+		_fonts[key] = _build_font(key)
 	return _fonts[key] as Font
+
+
+func _build_font(key: String) -> Font:
+	var paths: Array = FONT_FILES.get(key, FONT_FILES["ui"]) as Array
+	var primary: FontFile = null
+	var fallbacks: Array[Font] = []
+	for path: Variant in paths:
+		var f: FontFile = load(str(path)) as FontFile if ResourceLoader.exists(str(path)) else null
+		if f == null:
+			continue
+		if primary == null:
+			primary = f.duplicate() as FontFile
+		else:
+			fallbacks.append(f)
+	if primary == null:
+		var sys: SystemFont = SystemFont.new()
+		sys.font_names = _font_names_for(key)
+		return sys
+	primary.fallbacks = fallbacks
+	return primary
 
 
 func _font_names_for(role: String) -> PackedStringArray:

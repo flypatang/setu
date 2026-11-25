@@ -26,9 +26,9 @@ func _initialize() -> void:
 	crowd.sync(flow)
 	var cam: Camera3D = Camera3D.new()
 	cam.projection = Camera3D.PROJECTION_ORTHOGONAL
-	cam.size = 70.0
+	cam.size = float(args[3]) if args.size() > 3 else 70.0
 	cam.rotation_degrees = Vector3(-35.264, 45, 0)
-	cam.position = Vector3(20, 0, 0) + cam.basis.z * 200.0
+	cam.position = Vector3(float(args[4]) if args.size() > 4 else 20.0, 0, 0) + cam.basis.z * 200.0
 	cam.far = 1000.0
 	root3d.add_child(cam)
 	cam.make_current()
