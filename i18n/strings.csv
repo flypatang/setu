@@ -38,3 +38,29 @@ SADV_NILA_IDLE,"""Some crews are standing idle. Put them to work!""","""कु�
 SDLG_FIN_001,"On the fifth evening, the last stone marked ""राम"" touches the shore of Lanka. The bridge stretches a hundred yojanas across the sea.","पाँचवें दिन की संध्या को ""राम"" लिखा अंतिम पत्थर लंका के तट को छूता है। सेतु समुद्र पर सौ योजन तक फैला है।"
 SDLG_FIN_002,Gods and sages gather in the sky to see the wonder. The army of Rama begins to cross.,इस अद्भुत दृश्य को देखने देवता और ऋषि आकाश में एकत्र होते हैं। श्रीराम की सेना पार उतरने लगती है।
 SDLG_FIN_003,"""Nala, Nila — and every one of you, down to the smallest — this bridge is your devotion made into stone.""","""नल, नील — और तुम सब, छोटे से छोटे तक — यह सेतु पत्थर में ढली तुम्हारी भक्ति है।"""
+UI_MENU_TITLE,Setu — The Bridge to Lanka,सेतु — लंका तक का सेतु
+UI_MENU_BEGIN,Begin,आरंभ करें
+UI_MENU_RESUME,Resume,जारी रखें
+UI_MENU_SETTINGS,Settings,सेटिंग्स
+UI_MENU_QUIT,Quit,बाहर निकलें
+UI_MENU_QUIT_TO_TITLE,Quit to title,शीर्षक पर लौटें
+UI_MENU_BACK,Back,वापस
+UI_MENU_PAUSED,Paused,विराम
+UI_MENU_LANGUAGE,Language,भाषा
+UI_MENU_LANG_EN,English,English
+UI_MENU_LANG_HI,हिन्दी,हिन्दी
+UI_MENU_SHLOKA_CARDS,Shloka cards,श्लोक कार्ड
+UI_MENU_SHLOKA_ON,On,चालू
+UI_MENU_SHLOKA_SHORT,Short,संक्षिप्त
+UI_MENU_SHLOKA_OFF,Off,बंद
+UI_MENU_FPS,Frame rate cap,फ़्रेम दर सीमा
+UI_MENU_FPS_UNLIMITED,Unlimited,असीमित
+UI_MENU_GRAPHICS,Graphics,ग्राफ़िक्स
+UI_MENU_GFX_LOW,Low,निम्न
+UI_MENU_GFX_MEDIUM,Medium,मध्यम
+UI_MENU_GFX_HIGH,High,उच्च
+UI_MENU_VSYNC,VSync,वर्टिकल सिंक
+UI_MENU_FULLSCREEN,Fullscreen,पूर्ण स्क्रीन
+UI_MENU_VOLUME_MASTER,Master volume,मुख्य आवाज़
+UI_MENU_VOLUME_MUSIC,Music volume,संगीत की आवाज़
+UI_MENU_VOLUME_SFX,Sound effects volume,ध्वनि प्रभाव की आवाज़
