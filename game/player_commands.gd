@@ -4,7 +4,31 @@ extends RefCounted
 ## Pure logic: validates and records commands, never applies them (S11 does that).
 ## One class_name per file, so Command and CommandLog are inner classes:
 ## reach them as PlayerCommands.Command and PlayerCommands.CommandLog.
-## See game/COMMANDS.md for the argument reference.
+##
+## Command: {tick, type, args}. S11 (game/day_flow.gd) applies each command at its tick.
+##   tick: int, must be >= 0 (a non-whole or non-numeric tick is reported by validate).
+##   type: StringName, one of the types below.
+##   args: Dictionary, arguments for that type.
+##   to_dict() -> {"tick": int, "type": String, "args": Dictionary} with args normalised.
+##   Command.from_dict(d) rebuilds a command; JSON numbers become int (counts) or float (coordinates, angles).
+##
+## Command types (arg: type):
+##   draw_route           id: String, from: String (pile id), to: String (pile id), kind: String,
+##                        points: [[x, z], ...] (at least 2), haulers: int (>= 1). Haul route along a spline.
+##   assign_crews         role: String (cutter, lumberjack, lasher, scribe, hauler, builder),
+##                        site: String, crews: int (>= 1). Each crew is 10 vanaras.
+##   build_station        kind: String (lekhan, gong, shelter), pos: [x, z].
+##   place_measuring_line deg: float in [-180, 180]. Sets the alignment line.
+##   ring_gong            id: String (non-empty). Activates a gong.
+##   chant_jaya           no args; any extra key is a problem.
+## Coordinates [x, z] are in metres; both numbers must be finite.
+##
+## validate(cmd) -> Array[String] returns the problems; an empty array means valid.
+##
+## CommandLog: record(cmd) appends (same-tick commands keep record order); count(); all();
+##   commands_at(tick) returns commands at exactly that tick; to_json() is a JSON array of to_dict()
+##   entries; CommandLog.from_json(text) returns an empty log if the text is not a JSON array;
+##   state_hash() is the StateHash of the whole log, compared by the determinism gate after a round trip.
 
 const TYPE_DRAW_ROUTE: String = "draw_route"
 const TYPE_ASSIGN_CREWS: String = "assign_crews"
@@ -31,6 +55,8 @@ const SPECS: Dictionary = {
 ## Returns a list of human-readable problems; an empty array means the command is valid.
 static func validate(cmd: PlayerCommands.Command) -> Array[String]:
 	var problems: Array[String] = []
+	if cmd.tick_problem() != "":
+		problems.append(cmd.tick_problem())
 	if cmd.tick < 0:
 		problems.append("tick must be >= 0, got %d" % cmd.tick)
 	var type_name: String = String(cmd.type)
@@ -162,11 +188,18 @@ class Command extends RefCounted:
 	var tick: int = 0
 	var type: StringName = &""
 	var args: Dictionary = {}
+	## Set by from_dict when the raw tick was not a whole number (e.g. 1.5 or "7"), so validate reports it
+	## instead of silently truncating it.
+	var _tick_problem: String = ""
 
 	func _init(p_tick: int = 0, p_type: StringName = &"", p_args: Dictionary = {}) -> void:
 		tick = p_tick
 		type = p_type
 		args = p_args.duplicate(true)
+
+	## Empty when the tick was a whole number as given; otherwise a description of what was malformed.
+	func tick_problem() -> String:
+		return _tick_problem
 
 	func to_dict() -> Dictionary:
 		var type_name: String = String(type)
@@ -180,9 +213,13 @@ class Command extends RefCounted:
 		var type_name: String = str(d.get("type", ""))
 		var raw_args: Variant = d.get("args", {})
 		var args_dict: Dictionary = raw_args as Dictionary if raw_args is Dictionary else {}
+		var raw_tick: Variant = d.get("tick", 0)
+		var tick_ok: bool = PlayerCommands._is_finite_number(raw_tick) and PlayerCommands._is_whole(raw_tick)
 		var cmd: PlayerCommands.Command = PlayerCommands.Command.new(
-			PlayerCommands._to_int(d.get("tick", 0)), StringName(type_name), args_dict
+			PlayerCommands._to_int(raw_tick) if tick_ok else 0, StringName(type_name), args_dict
 		)
+		if not tick_ok:
+			cmd._tick_problem = "tick must be a whole number, got %s" % str(raw_tick)
 		cmd.args = PlayerCommands.normalize_args(type_name, args_dict)
 		return cmd
 

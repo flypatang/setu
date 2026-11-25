@@ -124,3 +124,22 @@ func test_to_dict_returns_a_copy_of_args() -> void:
 	var d: Dictionary = cmd.to_dict()
 	(d["args"] as Dictionary)["id"] = "changed"
 	assert_str(str(cmd.args["id"])).is_equal("g1")
+
+
+func test_fractional_tick_from_dict_is_reported_not_truncated() -> void:
+	var d: Dictionary = {"tick": 1.5, "type": "chant_jaya", "args": {}}
+	var cmd: PlayerCommands.Command = PlayerCommands.Command.from_dict(d)
+	assert_array(PlayerCommands.validate(cmd)).is_not_empty()
+
+
+func test_string_tick_from_dict_is_reported_not_zeroed() -> void:
+	var d: Dictionary = {"tick": "soon", "type": "chant_jaya", "args": {}}
+	var cmd: PlayerCommands.Command = PlayerCommands.Command.from_dict(d)
+	assert_array(PlayerCommands.validate(cmd)).is_not_empty()
+
+
+func test_whole_float_tick_from_dict_is_valid() -> void:
+	var d: Dictionary = {"tick": 12.0, "type": "chant_jaya", "args": {}}
+	var cmd: PlayerCommands.Command = PlayerCommands.Command.from_dict(d)
+	assert_int(cmd.tick).is_equal(12)
+	assert_array(PlayerCommands.validate(cmd)).is_empty()
