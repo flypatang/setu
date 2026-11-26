@@ -276,6 +276,7 @@ func _build_bar() -> void:
 		b.icon_alignment = HORIZONTAL_ALIGNMENT_CENTER
 		b.expand_icon = false
 		b.pressed.connect(_on_action_pressed.bind(id))
+		b.mouse_entered.connect(_sfx.bind(&"ui_hover"))
 		row.add_child(b)
 		_buttons[id] = b
 
@@ -399,6 +400,7 @@ func _on_action_pressed(id: StringName) -> void:
 
 
 func _on_speed_pressed(n: int) -> void:
+	_sfx(&"ui_click")
 	if enabled:
 		speed_requested.emit(n)
 
@@ -500,3 +502,10 @@ static func _tri(img: Image, a: Vector2, b: Vector2, c: Vector2, col: Color) -> 
 			var pos: bool = d1 > 0.0 or d2 > 0.0 or d3 > 0.0
 			if not (neg and pos):
 				_put(img, x, y, col)
+
+
+## Plays a Sound autoload event (silent when the autoload is absent).
+func _sfx(id: StringName) -> void:
+	var s: Node = get_node_or_null("/root/Sound") if is_inside_tree() else null
+	if s != null:
+		s.call("play", id)

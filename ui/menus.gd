@@ -358,6 +358,8 @@ func _add_button(parent: Control, button_name: String, key: String, handler: Cal
 	button.custom_minimum_size = Vector2(0.0, 44.0)
 	parent.add_child(button)
 	button.pressed.connect(handler)
+	button.pressed.connect(_sfx.bind(&"ui_back" if button_name == "BackButton" or button_name == "ResumeButton" else &"ui_click"))
+	button.mouse_entered.connect(_sfx.bind(&"ui_hover"))
 	_localize(button, key)
 	return button
 
@@ -524,3 +526,10 @@ func _on_quit_to_title_pressed() -> void:
 
 func _on_quit_pressed() -> void:
 	quit_requested.emit()
+
+
+## Plays a Sound autoload event (silent when the autoload is absent).
+func _sfx(id: StringName) -> void:
+	var s: Node = get_node_or_null("/root/Sound") if is_inside_tree() else null
+	if s != null:
+		s.call("play", id)

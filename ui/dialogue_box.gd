@@ -368,6 +368,7 @@ func _remove_entry() -> void:
 
 
 func _advance_runner() -> void:
+	_sfx(&"dialogue_advance")
 	_choices_dirty = true
 	_line_seen = false
 	_runner.advance()
@@ -391,6 +392,7 @@ func _on_shloka_shown(shloka_id: StringName) -> void:
 	_card_open = true
 	_panel.visible = false
 	_clear_choices()
+	_sfx(&"shloka_open")
 	shloka_started.emit(shloka_id)
 	_card.mode = shloka_mode
 	_card.show_shloka(shloka_id)
@@ -483,3 +485,10 @@ func _update_text() -> void:
 	for i: int in _revealed:
 		shown += _clusters[i]
 	_text_label.text = shown
+
+
+## Plays a Sound autoload event (silent when the autoload is absent).
+func _sfx(id: StringName) -> void:
+	var s: Node = get_node_or_null("/root/Sound") if is_inside_tree() else null
+	if s != null:
+		s.call("play", id)

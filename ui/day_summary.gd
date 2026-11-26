@@ -105,6 +105,7 @@ func _render() -> void:
 
 
 func _on_continue_pressed() -> void:
+	_sfx(&"ui_confirm")
 	continue_pressed.emit()
 
 
@@ -112,3 +113,10 @@ func _make_label(parent: Node) -> Label:
 	var label: Label = Label.new()
 	parent.add_child(label)
 	return label
+
+
+## Plays a Sound autoload event (silent when the autoload is absent).
+func _sfx(id: StringName) -> void:
+	var s: Node = get_node_or_null("/root/Sound") if is_inside_tree() else null
+	if s != null:
+		s.call("play", id)

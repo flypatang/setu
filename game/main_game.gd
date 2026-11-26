@@ -72,6 +72,7 @@ var _speed_label: Label = null
 var _hint: Label = null
 var _continue_button: Button = null
 var _credits: Control = null
+var _sound_node: Node = null
 
 
 func _ready() -> void:
@@ -302,6 +303,8 @@ func begin_day(n: int) -> void:
 	_hud.update_from(_flow)
 	_update_speed_label()
 	_set_game_ui(true)
+	_sound_watch()
+	_sfx(&"day_start")
 	_set_chapter("day_%d" % day_n)
 	if _tutorial_run and day_n == 1:
 		_tutorial.begin(Tutorial.SEQ_DAY)
@@ -320,6 +323,7 @@ func tick_frame(delta: float) -> int:
 	if n > 0:
 		_flow.run_ticks(n)
 		_sync_views()
+		_sound_call(&"poll_flow")
 	if _phase == Phase.PROLOGUE:
 		_check_first_stone()
 	elif _phase == Phase.DAY:
@@ -353,6 +357,7 @@ func finish_credits() -> void:
 
 func return_to_title() -> void:
 	_menu_paused = false
+	_sound_call(&"unwatch_flow")
 	_flow = null
 	_tutorial_run = false
 	if _tutorial != null and _tutorial.is_active():
@@ -403,6 +408,8 @@ func _check_events() -> void:
 	while _events_seen < fired.size():
 		var id: String = fired[_events_seen]
 		_events_seen += 1
+		if id == "sunset_near":
+			_sfx(&"sunset")
 		for e: Variant in _day_dict.get("events", []) as Array:
 			var ed: Dictionary = e as Dictionary
 			if str(ed.get("id", "")) == id and ed.has("dialogue") and DayFlow._int(ed.get("tick", 0)) < _flow.day_ticks:
@@ -431,6 +438,8 @@ func _on_day_over() -> void:
 	var next_day: int = _flow.day + 1
 	_save_progress(next_day)
 	_build_menu.close()
+	_sound_call(&"unwatch_flow")
+	_sfx(&"summary_open")
 	_summary.show_summary(_flow)
 	_summary.visible = true
 	_set_game_ui(false)
@@ -555,6 +564,7 @@ func _build_prologue() -> void:
 	_cumulative = 0
 	_carry = 0
 	_past.clear()
+	_sound_watch()
 	_build_stage(d)
 	_world.set_time_of_day(0.2)
 	_make_first_stone()
@@ -846,6 +856,8 @@ func _on_action(id: StringName) -> void:
 	_build_menu.close()
 	_bar.hide_crew_panel()
 	_controller.cancel()
+	if id != &"gong" and id != &"chant":
+		_sfx(&"action_select")
 	_current_action = id
 	match id:
 		&"route":
@@ -899,6 +911,7 @@ func _on_command(cmd: Dictionary, accepted: bool) -> void:
 	match str(cmd.get("type", "")):
 		"draw_route":
 			if accepted:
+				_sfx(&"route_drawn")
 				_bar.show_toast(tr("UI_TOAST_ROUTE_OK"))
 			elif _flow != null and _flow.crews.free_crews() < ceili(float(InputController.LINK_HAULERS) / float(DayFlow.HAULERS_PER_CREW)):
 				_bar.show_toast(tr("UI_TOAST_NO_FREE"))
@@ -915,6 +928,7 @@ func _on_command(cmd: Dictionary, accepted: bool) -> void:
 				}
 				_controller.add_site(site)
 				_add_marker(site)
+				_sfx(&"station_built")
 				_bar.show_toast(tr("UI_TOAST_STATION_OK"))
 			elif str(args.get("kind", "")) == "shelter":
 				_bar.show_toast(tr("UI_TOAST_SHELTER"))
@@ -923,8 +937,10 @@ func _on_command(cmd: Dictionary, accepted: bool) -> void:
 		"place_measuring_line":
 			_bar.show_toast(tr("UI_TOAST_MEASURE_OK"))
 		"chant_jaya":
+			_sfx(&"jaya_chant" if accepted else &"ui_back")
 			_bar.show_toast(tr("UI_TOAST_CHANT_OK") if accepted else tr("UI_TOAST_CHANT_WAIT"))
 		"ring_gong":
+			_sfx(&"gong" if accepted else &"ui_back")
 			_bar.show_toast(tr("UI_TOAST_GONG_OK") if accepted else tr("UI_TOAST_GONG_FAIL"))
 	_tutorial_update()
 
@@ -961,6 +977,7 @@ func _on_crew_change(site_id: String, role: String, delta: int) -> void:
 	else:
 		# The command set has no recorded "remove crew" command, so presentation must not edit crews.
 		return
+	_sfx(&"crew_assigned" if ok else &"ui_back")
 	if ok and _phase == Phase.PROLOGUE and _speed == 0 and delta > 0:
 		_prompt.visible = false
 		_prompt_button.visible = false
@@ -1157,6 +1174,31 @@ func _frame_sites() -> void:
 	_camera.set_ortho_size(size)
 	_camera.position = Vector3(focus.x, 0.0, focus.z)
 	_camera.focus_on(focus)
+
+
+# --- sound ---------------------------------------------------------------------
+
+## The Sound autoload, or a private instance when running without it (tests).
+func _sound() -> Node:
+	if _sound_node == null:
+		_sound_node = get_node_or_null("/root/Sound")
+	if _sound_node == null:
+		_sound_node = (load("res://core/sound.gd") as GDScript).new() as Node
+		add_child(_sound_node)
+	return _sound_node
+
+
+func _sfx(id: StringName) -> void:
+	_sound().call("play", id)
+
+
+func _sound_call(method: StringName) -> void:
+	if _sound_node != null:
+		_sound_node.call(method)
+
+
+func _sound_watch() -> void:
+	_sound().call("watch_flow", _flow)
 
 
 func _on_quit() -> void:
