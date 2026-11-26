@@ -46,7 +46,10 @@ var _reference_label: Label = null
 
 func _ready() -> void:
 	mouse_filter = Control.MOUSE_FILTER_IGNORE
-	set_anchors_preset(Control.PRESET_FULL_RECT)
+	# Cover the whole screen regardless of the (small) parent it lives in, so the card is centred with a full shade.
+	top_level = true
+	_fit_to_viewport()
+	get_viewport().size_changed.connect(_fit_to_viewport)
 	var locale: Node = get_node_or_null(^"/root/Locale")
 	if locale != null and locale.has_signal(&"language_changed"):
 		locale.connect(&"language_changed", _on_language_changed)
@@ -59,11 +62,21 @@ func _ready() -> void:
 	center.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	center.set_anchors_preset(Control.PRESET_FULL_RECT)
 	add_child(center)
+	var panel: PanelContainer = PanelContainer.new()
+	panel.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	var style: StyleBoxFlat = StyleBoxFlat.new()
+	style.bg_color = Color(Palette.UI_DARK, 0.82)
+	style.border_color = Color(Palette.GOLD, 0.6)
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(10)
+	style.set_content_margin_all(36)
+	panel.add_theme_stylebox_override(&"panel", style)
+	center.add_child(panel)
 	var column: VBoxContainer = VBoxContainer.new()
 	column.alignment = BoxContainer.ALIGNMENT_CENTER
 	column.add_theme_constant_override("separation", 12)
 	column.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	center.add_child(column)
+	panel.add_child(column)
 	_devanagari_label = _make_label(locale_font(self, &"shloka"), DEVANAGARI_SIZE, Palette.GOLD)
 	_iast_label = _make_label(locale_font(self, &"ui"), IAST_SIZE, Palette.MOON)
 	_translation_label = _make_label(locale_font(self, &"ui"), TRANSLATION_SIZE, Palette.MOON)
@@ -83,6 +96,11 @@ func _exit_tree() -> void:
 	var locale: Node = get_node_or_null(^"/root/Locale")
 	if locale != null and locale.is_connected(&"language_changed", _on_language_changed):
 		locale.disconnect(&"language_changed", _on_language_changed)
+
+
+func _fit_to_viewport() -> void:
+	position = Vector2.ZERO
+	size = get_viewport_rect().size
 
 
 func _process(delta: float) -> void:
