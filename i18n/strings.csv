@@ -74,7 +74,7 @@ UI_HUD_STOCK_ROPE,Rope: %d,रस्सी: %d
 UI_HUD_MORALE,Utsaha (morale): %d,उत्साह: %d
 UI_HUD_PAUSED,Paused,रुका हुआ
 UI_HUD_SPEED,Speed %dx,गति %dx
-UI_HUD_CONTROLS,Right-click: build menu    Space: pause    1/2/3: speed    WASD: pan    Q/E: rotate    Esc: menu,दायाँ क्लिक: निर्माण मेनू    स्पेस: रोकें    1/2/3: गति    WASD: कैमरा    Q/E: घुमाएँ    Esc: मेनू
+UI_HUD_CONTROLS,1-7: actions    Right-click: radial menu    Space: pause    +/-: speed    WASD: pan    Q/E: rotate    Esc: cancel / menu,1-7: क्रियाएँ    दायाँ क्लिक: वृत्ताकार मेनू    स्पेस: रोकें    +/-: गति    WASD: कैमरा    Q/E: घुमाएँ    Esc: रद्द / मेनू
 UI_SUM_TITLE,Day %d complete,दिन %d पूर्ण
 UI_SUM_LENGTH,Length: %.0f%%,लंबाई: %.0f%%
 UI_SUM_ALIGN,Alignment: %.0f%%,सीध: %.0f%%
@@ -108,3 +108,58 @@ Thank you for playing.","सेतु — लंका तक का पुल
 
 खेलने के लिए धन्यवाद।"
 UI_CREDITS_BACK,Return to title,मुख्य स्क्रीन पर लौटें
+UI_TIP_ROUTE,"Haul route: click where goods start, then where they should go. Haulers pass them hand to hand.","ढुलाई मार्ग: पहले वहाँ क्लिक करें जहाँ से माल उठेगा, फिर वहाँ जहाँ पहुँचना है। ढोने वाले माल को हाथों-हाथ आगे बढ़ाते हैं।"
+UI_TIP_CREWS,"Assign crews: click a site, then use + and - to put crews to work there.","दल नियुक्त करें: किसी स्थल पर क्लिक करें, फिर + और - से वहाँ दल लगाएँ या हटाएँ।"
+UI_TIP_LEKHAN,"Lekhan station: build it on the shore, where scribes write Rama's name so stones float.","लेखन-स्थल: इसे किनारे पर बनाएँ, जहाँ लेखक पत्थरों पर राम का नाम लिखते हैं ताकि वे तैरें।"
+UI_TIP_GONG,Gong: ring it to drive sea creatures away from the work.,घंटा: इसे बजाकर समुद्री जीवों को काम की जगह से दूर भगाएँ।
+UI_TIP_SHELTER,"Shelter: a place to rest, so the army regains its spirit.",विश्राम-स्थल: जहाँ सेना आराम करके उत्साह पाती है।
+UI_TIP_MEASURE,Measuring line: press and drag to set the line the bridge follows. Aligned sections are stronger.,"माप की रस्सी: दबाकर खींचें, पुल उसी रेखा पर बनेगा। सीधे भाग अधिक मज़बूत होते हैं।"
+UI_TIP_CHANT,Jaya chant: lift the army's morale at once. It needs time to recover.,जय-घोष: सेना का उत्साह तुरंत बढ़ाएँ। दोबारा करने में समय लगता है।
+UI_TIP_PAUSE,Pause or resume the game (Space).,खेल रोकें या फिर चलाएँ (स्पेस)।
+UI_TIP_SPEED,Run the game at %dx speed.,खेल को %dx गति से चलाएँ।
+UI_BANNER_ROUTE_1,"Click where the goods come from: the quarry, the forest, the rope-works or a Lekhan station.","क्लिक करें जहाँ से माल आता है: खदान, वन, रस्सी-घर या लेखन-स्थल।"
+UI_BANNER_ROUTE_2,Now click where they should go. Esc or right-click cancels.,अब क्लिक करें जहाँ उन्हें जाना है। Esc या दायाँ क्लिक रद्द करता है।
+UI_BANNER_CREWS,Click a site to assign crews there. Esc or right-click cancels.,दल लगाने के लिए किसी स्थल पर क्लिक करें। Esc या दायाँ क्लिक रद्द करता है।
+UI_BANNER_STATION,Click on the shore to place the station. Esc or right-click cancels.,स्थल बनाने के लिए किनारे पर क्लिक करें। Esc या दायाँ क्लिक रद्द करता है।
+UI_BANNER_MEASURE,"Press and drag along the line the bridge should follow, then release. Esc cancels.","जिस रेखा पर पुल बनना है उसके साथ दबाकर खींचें, फिर छोड़ें। Esc रद्द करता है।"
+UI_TOAST_ROUTE_OK,Haul route created.,ढुलाई मार्ग बन गया।
+UI_TOAST_FAIL,That did not work here. Check the place and your free crews.,यहाँ यह नहीं हो सका। स्थान और खाली दल जाँचें।
+UI_TOAST_NO_FREE,No free crews. Take a crew off another site first.,कोई खाली दल नहीं है। पहले किसी और स्थल से दल हटाएँ।
+UI_TOAST_ASSIGN_FAIL,This site cannot take that crew.,इस स्थल पर यह दल नहीं लग सकता।
+UI_TOAST_CHANT_OK,Jaya Shri Ram! The army cheers.,जय श्रीराम! सेना हर्षित है।
+UI_TOAST_CHANT_WAIT,The army is still catching its breath. Try the chant again soon.,सेना अभी साँस ले रही है। जल्द ही फिर जय-घोष करें।
+UI_TOAST_GONG_OK,The gong rings out across the water.,घंटा जल पर गूँज उठा।
+UI_TOAST_GONG_FAIL,"No gong possible now: it needs a sea creature nearby, and rope and timber at the bridge head.",अभी घंटा नहीं बन सकता: पास में समुद्री जीव और पुल-शीर्ष पर रस्सी व लकड़ी चाहिए।
+UI_TOAST_SHELTER,Shelters are not ready yet.,विश्राम-स्थल अभी तैयार नहीं हैं।
+UI_TOAST_MEASURE_OK,Measuring line set.,माप की रस्सी लग गई।
+UI_TOAST_STATION_OK,Station built.,स्थल बन गया।
+UI_SITE_QUARRY,Quarry,खदान
+UI_SITE_FOREST,Forest,वन
+UI_SITE_ROPEWORKS,Rope-works,रस्सी-घर
+UI_SITE_LEKHAN,Lekhan station,लेखन-स्थल
+UI_SITE_HEAD,Bridge head,पुल-शीर्ष
+UI_CREW_TITLE,Crews at: %s,दल: %s
+UI_CREW_ROLE_CUTTER,Cutters,पत्थर काटने वाले
+UI_CREW_ROLE_LUMBERJACK,Lumberjacks,लकड़हारे
+UI_CREW_ROLE_LASHER,Lashers,रस्सी बाँधने वाले
+UI_CREW_ROLE_SCRIBE,Scribes,लेखक
+UI_CREW_ROLE_BUILDER,Builders,निर्माता
+UI_CREW_ROLE_HAULER,Haulers,ढोने वाले
+UI_CREW_HERE,Crews here: %d,यहाँ दल: %d
+UI_CREW_FREE,Free crews: %d,खाली दल: %d
+UI_CREW_DONE,Done,पूर्ण
+TUT_STEP,Step %d of %d,चरण %d / %d
+TUT_SKIP,Skip tutorial,निर्देश छोड़ें
+TUT_P_SCRIBES,"Nala, every stone must carry Rama's name. Press Assign crew (2), click the Lekhan station, then press + to put the scribes to work.","नल, हर पत्थर पर राम का नाम होना चाहिए। 'दल नियुक्त करें' (2) दबाएँ, लेखन-स्थल पर क्लिक करें, फिर + दबाकर लेखकों को काम पर लगाएँ।"
+TUT_D_SCRIBES,"A new day begins. Put the scribes to work again: press Assign crew (2), click the Lekhan station, then press +.","नया दिन शुरू हुआ। लेखकों को फिर काम पर लगाएँ: 'दल नियुक्त करें' (2) दबाएँ, लेखन-स्थल पर क्लिक करें, फिर + दबाएँ।"
+TUT_D_ROUTE_A,"The stone must reach the scribes. Press Haul route (1), click the quarry, then click the Lekhan station.","पत्थर को लेखकों तक पहुँचना है। 'ढुलाई मार्ग' (1) दबाएँ, खदान पर क्लिक करें, फिर लेखन-स्थल पर।"
+TUT_D_ROUTE_B,"Stones with Rama's name go to the bridge head. Press Haul route (1), click the Lekhan station, then click the bridge head.","राम-नाम वाले पत्थर पुल-शीर्ष पर जाएँगे। 'ढुलाई मार्ग' (1) दबाएँ, लेखन-स्थल पर क्लिक करें, फिर पुल-शीर्ष पर।"
+TUT_D_CUTTERS,"Cutters free the stone from the quarry. Press Assign crew (2), click the quarry, then press +.","पत्थर काटने वाले खदान से पत्थर निकालते हैं। 'दल नियुक्त करें' (2) दबाएँ, खदान पर क्लिक करें, फिर + दबाएँ।"
+TUT_D_STONE,"Now watch: the first stone is inscribed, hauled to the bridge head, and floats into place.","अब देखिए: पहला पत्थर अंकित होगा, पुल-शीर्ष तक पहुँचेगा और जल पर तैरेगा।"
+TUT_D_MEASURE,"Keep the bridge straight. Press Measuring line (6), then press and drag along the line it should follow.","पुल को सीधा रखें। 'माप की रस्सी' (6) दबाएँ, फिर जिस रेखा पर पुल बनना है उसके साथ दबाकर खींचें।"
+TUT_D_SPEED,The day is long. Press 2x or 3x at the top right to speed up time.,दिन लंबा है। समय तेज़ करने के लिए ऊपर दाईं ओर 2x या 3x दबाएँ।
+TUT_DONE,Well done! The army is yours. Keep the bridge growing until sunset.,शाबाश! सेना अब आपकी है। सूर्यास्त तक पुल बढ़ाते रहें।
+TUTB_CREWS_LEKHAN,Click the Lekhan station.,लेखन-स्थल पर क्लिक करें।
+TUTB_CREWS_QUARRY,Click the quarry.,खदान पर क्लिक करें।
+TUTB_ROUTE_A,"Click the quarry, then click the Lekhan station.","खदान पर क्लिक करें, फिर लेखन-स्थल पर।"
+TUTB_ROUTE_B,"Click the Lekhan station, then click the bridge head.","लेखन-स्थल पर क्लिक करें, फिर पुल-शीर्ष पर।"
