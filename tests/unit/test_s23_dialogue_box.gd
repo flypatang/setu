@@ -164,13 +164,17 @@ func test_choice_button_emits_choice_selected_and_moves_on() -> void:
 	assert_str(_box.revealed_text()).is_equal("")
 
 
-func test_accept_does_nothing_while_a_choice_waits() -> void:
+func test_accept_answers_the_highlighted_choice_after_the_guard() -> void:
+	# Changed 2026-11-26 (owner bug: the game looked frozen at a choice). Accept is swallowed for a moment, then picks.
 	_box.play(StringName(MAIN_FILE))
 	_box.reveal_all()
 	_box.handle_input_event(_accept_event())
 	_box.reveal_all()
-	assert_bool(_box.handle_input_event(_accept_event())).is_false()
+	assert_bool(_box.handle_input_event(_accept_event())).is_true()
 	assert_str(_box.get_runner().current_node()).is_equal("n2")
+	_box.set("_choice_age", 1.0)
+	assert_bool(_box.handle_input_event(_accept_event())).is_true()
+	assert_str(_box.get_runner().current_node()).is_not_equal("n2")
 
 
 func test_play_at_a_node_reference_starts_there() -> void:

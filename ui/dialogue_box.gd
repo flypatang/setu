@@ -39,6 +39,9 @@ var _text_label: Label = null
 var _choice_box: VBoxContainer = null
 var _buttons: Array[Button] = []
 var _clusters: Array[String] = []
+## Seconds a choice must be on screen before keys can answer it (clicking a button always works).
+@export var choice_guard_seconds: float = 0.3
+var _choice_age: float = 0.0
 var _revealed: int = 0
 var _accum: float = 0.0
 var _playing: bool = false
@@ -63,6 +66,10 @@ func _exit_tree() -> void:
 func _process(delta: float) -> void:
 	if _playing and not _card_open:
 		step_typewriter(delta)
+	if _runner != null and _runner.waiting_for_choice():
+		_choice_age += delta
+	else:
+		_choice_age = 0.0
 
 
 func _unhandled_input(event: InputEvent) -> void:
@@ -114,10 +121,44 @@ func handle_input_event(event: InputEvent) -> bool:
 	if is_typing():
 		reveal_all()
 		return true
-	if _runner.waiting_for_choice() or not _runner.is_running():
+	if _runner.waiting_for_choice():
+		return _handle_choice_input(event)
+	if not _runner.is_running():
 		return false
 	_advance_runner()
 	return true
+
+
+## Choices must answer the same keys as every other line (owner bug 2026-11-26: at Jambavan's question the usual
+## advance key did nothing and the game looked frozen). Interact/accept/click picks the highlighted answer,
+## 1-4 pick directly, and up/down move the highlight.
+func _handle_choice_input(event: InputEvent) -> bool:
+	if _buttons.is_empty():
+		return false
+	if _choice_age < choice_guard_seconds:
+		return true  # swallow key-mashing from the previous line so nobody answers by accident
+	var key: InputEventKey = event as InputEventKey
+	if key != null and key.pressed and not key.echo:
+		var n: int = key.keycode - KEY_1
+		if n >= 0 and n < _buttons.size():
+			_buttons[n].pressed.emit()
+			return true
+	var focused: int = _focused_choice()
+	if event.is_action_pressed(&"ui_up") or event.is_action_pressed(&"ui_down"):
+		var step: int = -1 if event.is_action_pressed(&"ui_up") else 1
+		_buttons[posmod(focused + step, _buttons.size())].grab_focus()
+		return true
+	if event is InputEventMouseButton:
+		return false  # let the clicked button itself handle it
+	_buttons[maxi(focused, 0)].pressed.emit()
+	return true
+
+
+func _focused_choice() -> int:
+	for i: int in _buttons.size():
+		if _buttons[i].has_focus():
+			return i
+	return 0
 
 
 func is_playing() -> bool:
@@ -275,6 +316,12 @@ func _reset() -> void:
 
 
 func _is_advance_event(event: InputEvent) -> bool:
+	if _runner != null and _runner.waiting_for_choice():
+		if event.is_action_pressed(&"ui_up") or event.is_action_pressed(&"ui_down"):
+			return true
+		var key: InputEventKey = event as InputEventKey
+		if key != null and key.pressed and key.keycode >= KEY_1 and key.keycode <= KEY_4:
+			return true
 	if event.is_action_pressed(&"ui_accept"):
 		return true
 	if InputMap.has_action(&"interact") and event.is_action_pressed(&"interact"):
@@ -405,7 +452,7 @@ func _build_choices() -> void:
 	var texts: Array[String] = _runner.get_choice_texts()
 	for i: int in texts.size():
 		var button: Button = Button.new()
-		button.text = texts[i]
+		button.text = "%d.  %s" % [i + 1, texts[i]]
 		button.focus_mode = Control.FOCUS_ALL
 		button.visible = false
 		button.pressed.connect(_on_choice_pressed.bind(i))
