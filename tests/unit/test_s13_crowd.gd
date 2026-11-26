@@ -1,5 +1,5 @@
 extends GdUnitTestSuite
-## Acceptance tests for S13 (render/crowd.gd, render/rama_glyph.gd), DESIGN §9.
+## Acceptance tests for S13 (render/crowd.gd, render/rama_glyph.gd), DESIGN §9. Updated for S41 (art v2).
 
 
 func _flow(haulers: int, kind: String, stock: int) -> DayFlow:
@@ -90,8 +90,9 @@ func test_inscribed_stone_uses_glyph_mesh() -> void:
 func test_vanara_mesh_is_low_detail() -> void:
 	var crowd: CrowdView = _crowd()
 	var v: int = (crowd.vanara_mesh().surface_get_arrays(0)[Mesh.ARRAY_VERTEX] as PackedVector3Array).size()
-	assert_int(v / 3).is_less(300)
-	assert_int(v / 3).is_greater(60)
+	# S41 (art v2): about 300 triangles.
+	assert_int(v / 3).is_less(400)
+	assert_int(v / 3).is_greater(200)
 
 
 func test_glyph_mesh_nonempty_with_expected_strokes() -> void:

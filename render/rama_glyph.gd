@@ -2,7 +2,8 @@ class_name RamaGlyph
 extends RefCounted
 ## The Devanagari word राम as a flat textured quad (DESIGN §9, S14c; replaces the S13 extruded boxes).
 ## The word is rasterised ONCE from the bundled bold Noto Sans Devanagari (Locale.font_for('ui') under a
-## FontVariation) into an ImageTexture: SINDOOR ink with a slightly brushed edge on a transparent background.
+## FontVariation) into an ImageTexture: SINDOOR paint on a transparent background, brush-painted (S41, docs/ART.md):
+## a bristled edge, pigment pooled darker along the rim of each stroke and dry-brush bands inside it.
 ## Glyph outlines come straight from the TextServer and are filled on the CPU, so it also works headless.
 ## quad() is a flat quad facing +Z (width = height * ASPECT), centred on the origin, with UVs (v = 0 at the top).
 ## mesh() is the untouched legacy extruded-box version.
@@ -13,6 +14,8 @@ const TEXT: String = "राम"
 const _FONT_SIZE: int = 100
 const _EMBOLDEN: float = 0.55
 const _MARGIN: float = 0.06
+const _POOL_SHADE: float = 0.84
+const _BAND_SHADE: float = 0.10
 const _SUBROWS: int = 4
 const _FLATTEN_STEPS: int = 8
 
@@ -89,7 +92,12 @@ static func _render(px: int) -> Image:
 			var streak: float = _hash(y * 7 + 3, x / 6)
 			var cut: float = 0.5 + (n - 0.5) * 0.22 + (streak - 0.5) * 0.2
 			var a: float = smoothstep(cut - 0.14, cut + 0.14, c)
-			var shade: float = 1.0 - 0.10 * _hash(x / 3 + 11, y / 3 + 5)
+			# Pigment (S41): the paint pools darker along the rim of each stroke, and long dry-brush bands leave
+			# lighter and darker passes inside it. The hue stays SINDOOR; only the value moves.
+			var pool: float = lerpf(_POOL_SHADE, 1.0, smoothstep(0.62, 0.98, c))
+			var band: float = _hash(y / 2 * 13 + 1, x / 24)
+			var grain: float = _hash(x / 3 + 11, y / 3 + 5)
+			var shade: float = pool * (1.0 - _BAND_SHADE * band * band) * (1.0 - 0.04 * grain)
 			img.set_pixel(x, y, Color(ink.r * shade, ink.g * shade, ink.b * shade, a))
 	img.generate_mipmaps()
 	return img
