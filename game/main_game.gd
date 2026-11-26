@@ -911,7 +911,7 @@ func _on_command(cmd: Dictionary, accepted: bool) -> void:
 				var at: Array = args.get("pos", [0.0, 0.0]) as Array
 				var site: Dictionary = {
 					"id": "%s_%d" % [kind, _station_n], "role": str(ROLE_BY_STATION.get(kind, "")),
-					"pos": Vector2(DayFlow._num(at[0]), DayFlow._num(at[1])),
+					"pos": Vector2(_to_f(at[0]), _to_f(at[1])),
 				}
 				_controller.add_site(site)
 				_add_marker(site)
@@ -959,8 +959,8 @@ func _on_crew_change(site_id: String, role: String, delta: int) -> void:
 			if not ok:
 				_bar.show_toast(tr("UI_TOAST_ASSIGN_FAIL"))
 	else:
-		# The command set has no "remove crew" command, so the panel's minus edits the crews directly.
-		ok = _flow.crews.unassign(StringName(role), StringName(site_id), 1) > 0
+		# The command set has no recorded "remove crew" command, so presentation must not edit crews.
+		return
 	if ok and _phase == Phase.PROLOGUE and _speed == 0 and delta > 0:
 		_prompt.visible = false
 		_prompt_button.visible = false
@@ -1017,7 +1017,7 @@ func _setup_sites(day: Dictionary) -> void:
 		var at: Array = pd.get("pos", [0.0, 0.0]) as Array
 		var id: String = str(pd.get("id", ""))
 		has_head = has_head or id == "head"
-		sites.append({"id": id, "role": str(pd.get("role", "")), "pos": Vector2(DayFlow._num(at[0]), DayFlow._num(at[1]))})
+		sites.append({"id": id, "role": str(pd.get("role", "")), "pos": Vector2(_to_f(at[0]), _to_f(at[1]))})
 	if not has_head:
 		sites.append({"id": "head", "role": "builder", "pos": Vector2.ZERO})
 	_controller.set_sites(sites)
@@ -1208,3 +1208,9 @@ static func _read_json(path: String) -> Dictionary:
 	if parsed is Dictionary:
 		return parsed as Dictionary
 	return {}
+
+
+static func _to_f(v: Variant) -> float:
+	if v is float or v is int:
+		return v as float
+	return str(v).to_float()

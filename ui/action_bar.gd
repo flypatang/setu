@@ -44,7 +44,6 @@ var _panel_role: Label = null
 var _panel_count: Label = null
 var _panel_free: Label = null
 var _plus: Button = null
-var _minus: Button = null
 var _done: Button = null
 var _panel_site: String = ""
 var _panel_site_title: String = ""
@@ -115,9 +114,6 @@ func crew_plus_button() -> Button:
 	return _plus
 
 
-func crew_minus_button() -> Button:
-	return _minus
-
 
 func crew_panel_text() -> String:
 	return "%s\n%s\n%s" % [_panel_title.text, _panel_count.text, _panel_free.text]
@@ -185,7 +181,6 @@ func show_crew_panel(site_id: String, site_title: String, role: String, here: in
 	_panel_count.text = tr("UI_CREW_HERE") % here
 	_panel_free.text = tr("UI_CREW_FREE") % free
 	_plus.disabled = free <= 0
-	_minus.disabled = here <= 0
 	_panel.visible = true
 	if fresh:
 		var view: Vector2 = get_viewport_rect().size
@@ -366,8 +361,6 @@ func _build_panel() -> void:
 	var row: HBoxContainer = HBoxContainer.new()
 	row.add_theme_constant_override(&"separation", 8)
 	box.add_child(row)
-	_minus = _small_button(row, "-")
-	_minus.pressed.connect(_on_crew_pressed.bind(-1))
 	_panel_count = _label(row)
 	_panel_count.custom_minimum_size = Vector2(120.0, 0.0)
 	_panel_count.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER

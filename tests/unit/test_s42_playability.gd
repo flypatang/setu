@@ -169,7 +169,10 @@ func test_prologue_and_day_one_tutorial_completed_with_real_input() -> void:
 	await _drag(_screen_of(g, "lekhan"), _screen_of(g, "head"))
 	var align: float = g.flow().bridge.snapshot()["alignment_deg"] as float
 	assert_bool(absf(align) > 0.01).is_true()
-	# 7. speed up time was already done with the 3x button, so the tutorial is complete
+	# 7. speed up time: the 3x set in step 5 does not count, a change to 2x does
+	assert_bool(tut.is_active()).is_true()
+	await _press_button(g.action_bar().speed_button(2))
+	await _frames(2)
 	assert_bool(tut.is_active()).is_false()
 
 
@@ -243,7 +246,7 @@ func test_right_click_cancels_route_and_pick_modes() -> void:
 	assert_str(ctrl.mode()).is_equal(InputController.MODE_IDLE)
 
 
-func test_crew_panel_minus_removes_crew_and_shows_free_crews() -> void:
+func test_crew_panel_has_no_minus_and_plus_is_replayable() -> void:
 	var g: MainGame = _make()
 	g.begin_day(1)
 	await _frames(2)
@@ -255,10 +258,7 @@ func test_crew_panel_minus_removes_crew_and_shows_free_crews() -> void:
 	await _press_button(g.action_bar().crew_plus_button())
 	assert_int(g.flow().crews.crews_at(&"lekhan")).is_equal(2)
 	assert_int(g.flow().crews.free_crews()).is_equal(free0 - 2)
-	await _press_button(g.action_bar().crew_minus_button())
-	assert_int(g.flow().crews.crews_at(&"lekhan")).is_equal(1)
-	assert_int(g.flow().crews.free_crews()).is_equal(free0 - 1)
-	assert_bool(g.action_bar().crew_panel_text().contains(str(free0 - 1))).is_true()
+	assert_bool(g.action_bar().crew_panel_text().contains(str(free0 - 2))).is_true()
 	await _key(KEY_ESCAPE)
 	assert_bool(g.action_bar().is_crew_panel_open()).is_false()
 

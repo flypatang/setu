@@ -170,6 +170,10 @@ func evaluate(flow: DayFlow, speed: int) -> void:
 	var guard: int = 0
 	while _active and guard < 16:
 		guard += 1
+		if _speed_step != _index or _speed_seq != _sequence:
+			_speed_step = _index
+			_speed_seq = _sequence
+			_speed_base = speed
 		if not _step_done(current_step(), flow, speed):
 			return
 		_index += 1
@@ -178,6 +182,11 @@ func evaluate(flow: DayFlow, speed: int) -> void:
 			return
 		_refresh()
 		step_changed.emit(current_id())
+
+
+var _speed_step: int = -1
+var _speed_seq: String = ""
+var _speed_base: int = 1
 
 
 func _step_done(step: Dictionary, flow: DayFlow, speed: int) -> bool:
@@ -189,7 +198,7 @@ func _step_done(step: Dictionary, flow: DayFlow, speed: int) -> bool:
 			return flow != null and flow.bridge != null and flow.bridge.section_count() > 0 \
 				and flow.bridge.section(0).stone_in > 0
 		"speed":
-			return speed >= 2
+			return speed >= 2 and speed != _speed_base
 	return false
 
 
