@@ -1,6 +1,6 @@
 # Shared code from Hanumaan
 
-These files are copied from [flypatang/hanumaan](https://github.com/flypatang/hanumaan) at commit `9a3684e`, with their tests.
+These files are copied from [flypatang/hanumaan](https://github.com/flypatang/hanumaan) at commit `5d5146e`, with their tests.
 Fix bugs in Hanumaan first, then copy them over again. Once both games ship, the factory will move them into a shared addon.
 
 | File | Hanumaan module | Local changes |
@@ -15,3 +15,7 @@ Fix bugs in Hanumaan first, then copy them over again. Once both games ship, the
 | gen/sfx_library.gd | M11 | — |
 | gen/nature_kit.gd | M10, A4 | — |
 | gen/hanuman_model.gd | M07, A1 (the base for vanaras) | — |
+| core/look.gd | F1, B6 (mood lighting) | — |
+| gen/materials.gd | F2 (painterly materials) | — |
+| gen/sky.gd, gen/water.gd | F3 | — |
+| gen/vfx.gd | F8 | — |

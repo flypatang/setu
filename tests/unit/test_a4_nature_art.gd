@@ -1,24 +1,36 @@
 extends GdUnitTestSuite
 ## Acceptance tests for A4 (art pass on gen/nature_kit.gd): bark trunks joined to the canopy, mixed leaf greens,
 ## tall narrow ashoka with dense blossoms, broad dense shimshapa, stone/bark rocks, triangle budget.
+## Updated for B5 (art v2): vertices and colours are gathered over every surface (one per material kind), colours
+## are compared on RGB (alpha is the wind weight), the tree budget follows docs/ART.md, and rocks may carry moss.
 
-const TRI_BUDGET: int = 1500
+const TRI_BUDGET: int = NatureKit.TREE_TRI_BUDGET
 
 
 func _verts(mi: MeshInstance3D) -> PackedVector3Array:
-	var arrays: Array = (mi.mesh as ArrayMesh).surface_get_arrays(0)
-	return arrays[Mesh.ARRAY_VERTEX] as PackedVector3Array
+	var mesh: ArrayMesh = mi.mesh as ArrayMesh
+	var all: PackedVector3Array = PackedVector3Array()
+	for s: int in range(mesh.get_surface_count()):
+		all.append_array(mesh.surface_get_arrays(s)[Mesh.ARRAY_VERTEX] as PackedVector3Array)
+	return all
 
 
 func _cols(mi: MeshInstance3D) -> PackedColorArray:
-	var arrays: Array = (mi.mesh as ArrayMesh).surface_get_arrays(0)
-	return arrays[Mesh.ARRAY_COLOR] as PackedColorArray
+	var mesh: ArrayMesh = mi.mesh as ArrayMesh
+	var all: PackedColorArray = PackedColorArray()
+	for s: int in range(mesh.get_surface_count()):
+		all.append_array(mesh.surface_get_arrays(s)[Mesh.ARRAY_COLOR] as PackedColorArray)
+	return all
+
+
+func _same_rgb(a: Color, b: Color) -> bool:
+	return is_equal_approx(a.r, b.r) and is_equal_approx(a.g, b.g) and is_equal_approx(a.b, b.b)
 
 
 func _count_colour(mi: MeshInstance3D, target: Color) -> int:
 	var n: int = 0
 	for c: Color in _cols(mi):
-		if c.is_equal_approx(target):
+		if _same_rgb(c, target):
 			n += 1
 	return n
 
@@ -28,7 +40,7 @@ func _max_y_of(mi: MeshInstance3D, target: Color) -> float:
 	var cols: PackedColorArray = _cols(mi)
 	var best: float = -1000.0
 	for i: int in range(verts.size()):
-		if cols[i].is_equal_approx(target):
+		if _same_rgb(cols[i], target):
 			best = maxf(best, verts[i].y)
 	return best
 
@@ -102,7 +114,14 @@ func test_rocks_and_cliffs_use_stone_or_bark_tones() -> void:
 	auto_free(rock)
 	auto_free(cliff)
 	for mi: MeshInstance3D in [rock, cliff]:
-		for c: Color in _cols(mi):
-			# Warm, never green or blue: red >= green >= blue.
-			assert_bool(c.r >= c.g - 0.001 and c.g >= c.b - 0.001).is_true()
-			assert_float(c.r).is_greater(0.3)
+		var warm: int = 0
+		var cols: PackedColorArray = _cols(mi)
+		for c: Color in cols:
+			# Never blue: blue is always below green. Stone and bark tones are warm (red >= green); only moss
+			# (art v2) leans green.
+			assert_bool(c.b <= c.g + 0.001).is_true()
+			assert_float(maxf(c.r, c.g)).is_greater(0.3)
+			if c.r >= c.g - 0.001:
+				warm += 1
+		# Stone dominates; moss is an accent.
+		assert_int(warm).is_greater(cols.size() / 2)
