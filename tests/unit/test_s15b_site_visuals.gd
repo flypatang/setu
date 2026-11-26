@@ -3,7 +3,7 @@ extends GdUnitTestSuite
 ## Checks: each of the quarry, forest, rope-works and lekhan sites is built from enough parts to read from the iso
 ## camera (rock cluster plus cliff and cut-stone pile; a grove of 12-20 trees; a shed with rope coils; a canopy with
 ## scribes' stones carrying the RamaGlyph mesh), each visible site has a torch light that is dark at noon and lit at
-## night, and the sun elevation is clamped above a small positive minimum with shadows off at night.
+## first light and after dusk, and the key light (sun or moon) stays above the horizon and casts shadows all day.
 ## Headless and deterministic.
 
 const DAY_1_PATH: String = "res://data/days/day_1.json"
@@ -102,7 +102,7 @@ func test_every_visible_site_has_a_torch_light() -> void:
 		assert_bool(found).is_true()
 
 
-func test_torches_are_dark_at_noon_and_full_at_midnight() -> void:
+func test_torches_are_dark_at_noon_and_lit_at_first_light() -> void:
 	var view: Node3D = _built_view()
 	var torches: Array[OmniLight3D] = _torches(view)
 	assert_int(torches.size()).is_equal(VISIBLE_ROLES.size())
@@ -142,22 +142,19 @@ func test_torch_energy_rises_monotonically_through_dusk_and_stays_bounded() -> v
 		previous = energy
 
 
-func test_sun_elevation_is_clamped_above_small_positive_minimum_at_midnight() -> void:
-	var view: Node3D = _built_view()
-	view.call("set_time_of_day", 0.0)
-	var sun: DirectionalLight3D = view.call("get_sun") as DirectionalLight3D
-	var travel: Vector3 = -sun.transform.basis.z
-	# Light still travels downward (sun above the horizon) but only at a shallow angle.
-	assert_float(travel.y).is_less(0.0)
-	assert_float(travel.y).is_greater(-0.2)
-
-
-func test_sun_shadows_off_at_night_and_on_at_noon() -> void:
+func test_key_light_stays_above_the_horizon_at_first_light_and_nightfall() -> void:
 	var view: Node3D = _built_view()
 	var sun: DirectionalLight3D = view.call("get_sun") as DirectionalLight3D
-	view.call("set_time_of_day", 0.5)
-	assert_bool(sun.shadow_enabled).is_true()
-	view.call("set_time_of_day", 0.0)
-	assert_bool(sun.shadow_enabled).is_false()
-	view.call("set_time_of_day", 0.95)
-	assert_bool(sun.shadow_enabled).is_false()
+	for t: float in [0.0, 1.0]:
+		view.call("set_time_of_day", t)
+		var travel: Vector3 = -sun.transform.basis.z
+		assert_float(travel.y).is_less(-0.3)
+
+
+func test_key_light_casts_shadows_all_day() -> void:
+	# S40: the night key is the moon of the Look "night" mood, a real light with a real direction, so shadows stay on.
+	var view: Node3D = _built_view()
+	var sun: DirectionalLight3D = view.call("get_sun") as DirectionalLight3D
+	for t: float in [0.0, 0.5, 0.9, 1.0]:
+		view.call("set_time_of_day", t)
+		assert_bool(sun.shadow_enabled).is_true()

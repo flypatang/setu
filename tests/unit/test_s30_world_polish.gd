@@ -1,15 +1,14 @@
 extends GdUnitTestSuite
 ## Acceptance tests for S30 (render/world_view.gd world polish), DESIGN §9.
 ## Checks: scattered trees, rocks and grass exist as MultiMeshes and keep clear of the sites and the haul corridor,
-## palms stand near the beach, foam lines the shoreline, a hill line stands far inland, vanara tents carry SAFFRON
+## palms stand near the beach, a foam strip lines the shoreline, a hill line stands far inland, vanara tents carry SAFFRON
 ## flags, Rama's camp pavilion has GOLD trim and no figure, the forest site holds trees, the scenery is deterministic
 ## and the triangle budget is reasonable. Headless and deterministic.
 
 const DAY_1_PATH: String = "res://data/days/day_1.json"
 const WORLD_VIEW_SCRIPT: String = "res://render/world_view.gd"
 const SITE_CLEARANCE: float = 9.0
-## TODO(S40): Art v2 trees pushed scenery to ~366k triangles; S40 must bring it back under 150000.
-const TRIANGLE_BUDGET: int = 400000
+const TRIANGLE_BUDGET: int = 150000
 
 
 func _load_day_1() -> Dictionary:
@@ -92,11 +91,17 @@ func test_palms_stand_near_the_beach() -> void:
 
 
 func test_foam_lines_the_shore() -> void:
+	# S40: the foam is one WaterKit.shoreline_foam strip along the waterline (it was a MultiMesh of boxes).
 	var view: Node3D = _built_view()
-	assert_int(_count(view, "Foam")).is_greater_equal(20)
-	assert_int(_instance_positions(view, "Foam").size()).is_equal(_count(view, "Foam"))
-	for p: Vector3 in _instance_positions(view, "Foam"):
-		assert_float(p.x).is_between(2.0, 8.0)
+	var shore: Node3D = view.get_node_or_null("Shore") as Node3D
+	assert_object(shore).is_not_null()
+	var foam: MeshInstance3D = shore.get_node_or_null(WaterKit.FOAM_NAME) as MeshInstance3D
+	assert_object(foam).is_not_null()
+	assert_float(foam.position.x).is_between(2.0, 8.0)
+	# The strip runs along the shore (world z) for the whole length of the land.
+	var along: Vector3 = foam.transform.basis.x
+	assert_float(absf(along.z)).is_equal_approx(1.0, 0.001)
+	assert_float((foam.mesh as PlaneMesh).size.x).is_greater_equal(500.0)
 
 
 func test_hill_line_is_far_inland() -> void:

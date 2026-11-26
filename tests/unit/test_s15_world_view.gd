@@ -1,18 +1,23 @@
 extends GdUnitTestSuite
 ## Acceptance tests for S15 (render/world_view.gd), DESIGN §9.
-## Checks: a node exists for every site in data/days/day_1.json (at the JSON position), the sun colour at
-## t = 0.25 / 0.5 / 0.75 / 0.95 matches DAWN_PINK / white / SAFFRON / NIGHT_INDIGO, night light is dimmer than noon,
-## and the ocean, shore, lights and WorldEnvironment exist. Headless and deterministic.
+## Checks: a node exists for every site in data/days/day_1.json (at the JSON position), the key light takes the
+## colour of the Look mood of the time of day (dawn, day, dusk; night on a night-shift day), the night light is dimmer
+## than noon, the light always shines downward, and the ocean, shore, Look rig and WorldEnvironment exist.
+## Since S40 (art v2) the time of day is the fraction of the working day: 0 = first light, 0.5 = noon, 1 = nightfall.
+## Headless and deterministic.
 
 const DAY_1_PATH: String = "res://data/days/day_1.json"
+const DAY_3_PATH: String = "res://data/days/day_3.json"
 const WORLD_VIEW_SCRIPT: String = "res://render/world_view.gd"
 
 
 func _load_day_1() -> Dictionary:
-	var file: FileAccess = FileAccess.open(DAY_1_PATH, FileAccess.READ)
-	var text: String = file.get_as_text()
-	file.close()
-	return JSON.parse_string(text) as Dictionary
+	return JSON.parse_string(FileAccess.get_file_as_string(DAY_1_PATH)) as Dictionary
+
+
+## Day 3 has a night shift (night_from = 6400 of 9600 ticks).
+func _load_day_3() -> Dictionary:
+	return JSON.parse_string(FileAccess.get_file_as_string(DAY_3_PATH)) as Dictionary
 
 
 func _new_view() -> Node3D:
@@ -48,35 +53,39 @@ func test_world_has_shore_ocean_lights_and_environment() -> void:
 	var view: Node3D = auto_free(_new_view())
 	view.call("build_from_day", day)
 	assert_object(view.get_node_or_null("Shore")).is_not_null()
+	assert_object(view.get_node_or_null("Land")).is_not_null()
 	assert_object(view.get_node_or_null("Ocean")).is_not_null()
 	assert_object(view.call("get_sun") as DirectionalLight3D).is_not_null()
-	assert_object(view.get_node_or_null("RimLight")).is_not_null()
+	assert_object(view.get_node_or_null("Fill")).is_not_null()
+	assert_object(view.get_node_or_null("BackRim")).is_not_null()
 	assert_object(view.get_node_or_null("WorldEnvironment")).is_not_null()
+	assert_object(view.call("get_environment_node") as WorldEnvironment).is_not_null()
 
 
-func test_sun_colour_matches_palette_at_key_times() -> void:
-	var day: Dictionary = _load_day_1()
+func test_sun_colour_matches_look_mood_at_key_times() -> void:
 	var view: Node3D = auto_free(_new_view())
-	view.call("build_from_day", day)
+	view.call("build_from_day", _load_day_1())
 	var sun: DirectionalLight3D = view.call("get_sun") as DirectionalLight3D
 
-	view.call("set_time_of_day", 0.25)
-	assert_bool(_colour_matches(sun.light_color, Palette.DAWN_PINK)).is_true()
+	view.call("set_time_of_day", 0.05)
+	assert_bool(_colour_matches(sun.light_color, Look.mood_settings(&"dawn").key_color)).is_true()
 
 	view.call("set_time_of_day", 0.5)
-	assert_bool(_colour_matches(sun.light_color, Color.WHITE)).is_true()
+	assert_bool(_colour_matches(sun.light_color, Look.mood_settings(&"day").key_color)).is_true()
 
-	view.call("set_time_of_day", 0.75)
-	assert_bool(_colour_matches(sun.light_color, Palette.SAFFRON)).is_true()
+	view.call("set_time_of_day", 0.9)
+	assert_bool(_colour_matches(sun.light_color, Look.mood_settings(&"dusk").key_color)).is_true()
 
-	view.call("set_time_of_day", 0.95)
-	assert_bool(_colour_matches(sun.light_color, Palette.NIGHT_INDIGO)).is_true()
+	var night_view: Node3D = auto_free(_new_view())
+	night_view.call("build_from_day", _load_day_3())
+	var moon: DirectionalLight3D = night_view.call("get_sun") as DirectionalLight3D
+	night_view.call("set_time_of_day", 0.95)
+	assert_bool(_colour_matches(moon.light_color, Look.mood_settings(&"night").key_color)).is_true()
 
 
 func test_night_light_is_dimmer_than_noon() -> void:
-	var day: Dictionary = _load_day_1()
 	var view: Node3D = auto_free(_new_view())
-	view.call("build_from_day", day)
+	view.call("build_from_day", _load_day_3())
 	var sun: DirectionalLight3D = view.call("get_sun") as DirectionalLight3D
 
 	view.call("set_time_of_day", 0.5)
@@ -87,19 +96,24 @@ func test_night_light_is_dimmer_than_noon() -> void:
 	assert_float(night_energy).is_greater(0.0)
 
 
-func test_sun_is_above_horizon_at_noon_and_below_at_night() -> void:
-	var day: Dictionary = _load_day_1()
+func test_light_is_high_at_noon_and_always_shines_downward() -> void:
 	var view: Node3D = auto_free(_new_view())
-	view.call("build_from_day", day)
+	view.call("build_from_day", _load_day_3())
 	var sun: DirectionalLight3D = view.call("get_sun") as DirectionalLight3D
 
 	view.call("set_time_of_day", 0.5)
 	var noon_down: Vector3 = -sun.transform.basis.z
 	assert_float(noon_down.y).is_less(-0.5)
 
-	view.call("set_time_of_day", 0.0)
-	var midnight_down: Vector3 = -sun.transform.basis.z
-	# S15b: the sun elevation is clamped to a small positive minimum, so at midnight the light still travels
-	# downward, only at a shallow angle.
-	assert_float(midnight_down.y).is_less(0.0)
-	assert_float(midnight_down.y).is_greater(-0.2)
+	# Sun or moon, the key light stays above the horizon all day (no light from below the ground).
+	for step: int in range(0, 21):
+		view.call("set_time_of_day", float(step) / 20.0)
+		var travel: Vector3 = -sun.transform.basis.z
+		assert_float(travel.y).is_less(-0.3)
+
+
+func test_set_time_of_day_works_before_build() -> void:
+	var view: Node3D = auto_free(_new_view())
+	view.call("set_time_of_day", 0.5)
+	assert_object(view.call("get_sun") as DirectionalLight3D).is_not_null()
+	assert_object(view.call("get_environment_node") as WorldEnvironment).is_not_null()
