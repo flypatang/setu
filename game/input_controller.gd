@@ -28,11 +28,26 @@ extends Node
 signal command_issued(cmd: Dictionary, accepted: bool)
 signal time_requested(action: StringName)
 signal mode_changed(mode: String)
+## A site was clicked in pick mode (S42): the crew panel opens for it.
+signal site_picked(site_id: String, screen: Vector2)
+## The first site of a site-to-site haul route was clicked (S42).
+signal link_started(from_id: String)
 
 const MODE_IDLE: String = "idle"
 const MODE_ROUTE: String = "route"
 const MODE_STATION: String = "station"
 const MODE_MEASURE: String = "measure"
+## S42: click a source site, then a destination site; the route is drawn between them.
+const MODE_LINK: String = "link"
+## S42: click one site; site_picked is emitted (used by the crew panel).
+const MODE_PICK: String = "pick"
+## How close (m) a click must be to a site to pick it.
+const SITE_PICK_RADIUS: float = 9.0
+const LINK_HAULERS: int = 20
+## Resource produced by the crews of a site role: what a route that starts there carries.
+const ROLE_KIND: Dictionary = {
+	"cutter": "stone", "lumberjack": "timber", "lasher": "rope", "scribe": "inscribed_stone",
+}
 const MIN_DRAG_M: float = 1.0
 const PLANE_EPSILON: float = 0.000001
 ## Gamepad cursor speed on the left stick, in screen pixels per second at full deflection.
@@ -58,6 +73,9 @@ var _station_kind: String = ""
 var _measure_start: Vector2 = Vector2.ZERO
 var _measure_dragging: bool = false
 var _gong_id: String = ""
+var _sites: Array[Dictionary] = []
+var _link_from: String = ""
+var _link_n: int = 0
 ## Screen position of the gamepad cursor (used when a gamepad button acts on the ground).
 var _cursor: Vector2 = Vector2.ZERO
 
@@ -128,8 +146,71 @@ func begin_measure() -> void:
 	_set_mode(MODE_MEASURE)
 
 
+## Replaces the clickable sites: dictionaries {id: String, role: String, pos: Vector2}.
+func set_sites(sites: Array[Dictionary]) -> void:
+	_sites = sites.duplicate()
+
+
+func add_site(site: Dictionary) -> void:
+	_sites.append(site)
+
+
+func sites() -> Array[Dictionary]:
+	return _sites
+
+
+## Id of the site nearest to the ground point p within SITE_PICK_RADIUS, or "".
+func site_at(p: Vector2) -> String:
+	if not _is_valid_ground(p):
+		return ""
+	var best: String = ""
+	var best_d: float = SITE_PICK_RADIUS
+	for s: Dictionary in _sites:
+		var d: float = (s["pos"] as Vector2).distance_to(p)
+		if d <= best_d:
+			best_d = d
+			best = str(s["id"])
+	return best
+
+
+func site_position(id: String) -> Vector2:
+	for s: Dictionary in _sites:
+		if str(s["id"]) == id:
+			return s["pos"] as Vector2
+	return Vector2(INF, INF)
+
+
+func site_role(id: String) -> String:
+	for s: Dictionary in _sites:
+		if str(s["id"]) == id:
+			return str(s["role"])
+	return ""
+
+
+## True when a route may start at this site (its crews make a resource).
+func can_start_route(id: String) -> bool:
+	return ROLE_KIND.has(site_role(id))
+
+
+## The site the route being linked starts at, or "" before the first click.
+func link_from() -> String:
+	return _link_from
+
+
+## Starts a site-to-site haul route: click the source, then the destination.
+func begin_link() -> void:
+	_link_from = ""
+	_set_mode(MODE_LINK)
+
+
+## Starts picking one site (for the crew panel).
+func begin_pick() -> void:
+	_set_mode(MODE_PICK)
+
+
 ## Drops whatever is in progress without sending a command.
 func cancel() -> void:
+	_link_from = ""
 	_route_points.clear()
 	_measure_dragging = false
 	_set_mode(MODE_IDLE)
@@ -243,6 +324,10 @@ func _unhandled_input(event: InputEvent) -> void:
 	# Mouse events act at their own position; gamepad buttons act at the virtual cursor.
 	var at: Vector2 = _cursor if mouse == null else mouse.position
 	match _mode:
+		MODE_LINK:
+			_link_input(event, at)
+		MODE_PICK:
+			_pick_input(event, at)
 		MODE_ROUTE:
 			_route_input(event, at)
 		MODE_STATION:
@@ -251,6 +336,47 @@ func _unhandled_input(event: InputEvent) -> void:
 				_consume()
 		MODE_MEASURE:
 			_measure_input(event, at)
+
+
+func _link_input(event: InputEvent, at: Vector2) -> void:
+	if event.is_action_pressed(&"menu"):
+		cancel()
+		_consume()
+	elif event.is_action_pressed(&"select"):
+		_consume()
+		var id: String = site_at(pick_ground(at))
+		if id == "":
+			return
+		if _link_from == "":
+			if can_start_route(id):
+				_link_from = id
+				link_started.emit(id)
+			return
+		if id == _link_from:
+			return
+		var from_id: String = _link_from
+		var a: Vector2 = site_position(from_id)
+		var b: Vector2 = site_position(id)
+		_link_from = ""
+		_set_mode(MODE_IDLE)
+		_link_n += 1
+		_send(PlayerCommands.TYPE_DRAW_ROUTE, {
+			"id": "hr%d" % _link_n, "from": from_id, "to": id, "kind": str(ROLE_KIND[site_role(from_id)]),
+			"points": [[a.x, a.y], [b.x, b.y]], "haulers": LINK_HAULERS,
+		})
+
+
+func _pick_input(event: InputEvent, at: Vector2) -> void:
+	if event.is_action_pressed(&"menu"):
+		cancel()
+		_consume()
+	elif event.is_action_pressed(&"select"):
+		_consume()
+		var id: String = site_at(pick_ground(at))
+		if id == "":
+			return
+		_set_mode(MODE_IDLE)
+		site_picked.emit(id, at)
 
 
 func _route_input(event: InputEvent, at: Vector2) -> void:

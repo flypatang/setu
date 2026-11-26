@@ -17,16 +17,15 @@ const FLAG_CARRY: StringName = &"carry_m"
 const PROLOGUE_SPEED: int = 2
 const DAY_START_ORTHO: float = 45.0
 const FIRST_STONE_POS: Vector3 = Vector3(-6.0, 0.0, 4.0)
-const ROUTE_PRESETS: Array = [
-	["quarry", "lekhan", "stone"], ["lekhan", "head", "inscribed_stone"], ["forest", "head", "timber"],
-	["forest", "ropeworks", "timber"], ["ropeworks", "head", "rope"],
-]
-const CREW_PRESETS: Array = [["cutter", "quarry"], ["lumberjack", "forest"], ["lasher", "ropeworks"], ["scribe", "lekhan"]]
+const MARKER_RADIUS: float = 6.5
+const ROLE_BY_STATION: Dictionary = {"lekhan": "scribe", "quarry": "cutter", "forest": "lumberjack", "ropeworks": "lasher"}
 
 ## When false nothing is written to disk (tests).
 var persist: bool = true
 ## When false event and story dialogue is skipped (tests).
 var dialogue_enabled: bool = true
+## When false a new game skips the guided tutorial (S42).
+var tutorial_enabled: bool = true
 ## The GameState autoload (or a stand-in). Looked up in _ready when left null.
 var game_state: Node = null
 
@@ -43,9 +42,13 @@ var _past_views: Array[BridgeView] = []
 var _events_seen: int = 0
 var _queue: Array[String] = []
 var _after_dialogue: Callable = Callable()
-var _route_n: int = 0
-var _preset_route: int = 0
-var _preset_crew: int = 0
+var _station_n: int = 0
+var _tutorial_run: bool = false
+var _current_action: StringName = &""
+var _markers: Dictionary = {}
+var _preview: MeshInstance3D = null
+var _arrow: MeshInstance3D = null
+var _pulse_t: float = 0.0
 var _first_stone: Node3D = null
 var _floated: bool = false
 var _t: float = 0.0
@@ -59,6 +62,8 @@ var _controller: InputController = null
 var _menus: Menus = null
 var _dialogue: DialogueBox = null
 var _hud: Hud = null
+var _bar: ActionBar = null
+var _tutorial: Tutorial = null
 var _build_menu: BuildMenu = null
 var _summary: DaySummary = null
 var _prompt: Label = null
@@ -85,6 +90,10 @@ func _ready() -> void:
 	_controller = InputController.new()
 	add_child(_controller)
 	_controller.time_requested.connect(_on_time_requested)
+	_controller.command_issued.connect(_on_command)
+	_controller.mode_changed.connect(_on_mode_changed)
+	_controller.link_started.connect(_on_link_started)
+	_controller.site_picked.connect(_on_site_picked)
 	_build_ui()
 	var locale: Node = get_node_or_null("/root/Locale")
 	if locale != null and locale.has_signal("language_changed"):
@@ -107,6 +116,9 @@ func _physics_process(delta: float) -> void:
 
 func _process(delta: float) -> void:
 	_t += delta
+	_pulse_t += delta
+	_update_overlay()
+	_tutorial_update()
 	if _first_stone != null:
 		var lift: float = 0.0
 		if _floated:
@@ -140,6 +152,14 @@ func origin_x() -> float:
 func bridge_head_x() -> float:
 	var built: int = _flow.bridge.length_m() if _flow != null else 0
 	return origin_x() + float(built) * BridgeView.SECTION_LENGTH
+
+
+func action_bar() -> ActionBar:
+	return _bar
+
+
+func tutorial() -> Tutorial:
+	return _tutorial
 
 
 func hint_label() -> Label:
@@ -230,6 +250,7 @@ func close_pause() -> void:
 func start_new_game() -> void:
 	_reset_progress()
 	_menus.hide_menus()
+	_tutorial_run = false
 	_phase = Phase.PROLOGUE
 	_build_prologue()
 	_say("pro_shore", Callable(self, "_prologue_ready"))
@@ -282,6 +303,11 @@ func begin_day(n: int) -> void:
 	_update_speed_label()
 	_set_game_ui(true)
 	_set_chapter("day_%d" % day_n)
+	if _tutorial_run and day_n == 1:
+		_tutorial.begin(Tutorial.SEQ_DAY)
+		_frame_sites()
+	elif _tutorial.is_active():
+		_tutorial.skip()
 
 
 ## Advances the simulation by real time delta. Returns the number of ticks run.
@@ -300,6 +326,7 @@ func tick_frame(delta: float) -> int:
 		_check_events()
 		if _flow.is_over():
 			_on_day_over()
+	_tutorial_update()
 	return n
 
 
@@ -327,6 +354,9 @@ func finish_credits() -> void:
 func return_to_title() -> void:
 	_menu_paused = false
 	_flow = null
+	_tutorial_run = false
+	if _tutorial != null and _tutorial.is_active():
+		_tutorial.skip()
 	_queue.clear()
 	_after_dialogue = Callable()
 	_clear_stage()
@@ -343,6 +373,11 @@ func is_story_dialogue_pending() -> bool:
 # --- story ---------------------------------------------------------------------
 
 func _prologue_ready() -> void:
+	if tutorial_enabled and _flow != null:
+		_tutorial_run = true
+		_tutorial.begin(Tutorial.SEQ_PROLOGUE)
+		_frame_sites()
+		return
 	_prompt.text = tr("UI_PRO_PROMPT")
 	_prompt_button.text = tr("UI_PRO_ASSIGN")
 	_prompt.visible = true
@@ -468,6 +503,7 @@ func _build_stage(day: Dictionary) -> void:
 	_crowd = CrowdView.new()
 	_stage.add_child(_crowd)
 	_controller.attach(_flow, _camera.get_camera())
+	_setup_sites(day)
 	_sync_views()
 
 
@@ -479,6 +515,10 @@ func _clear_stage() -> void:
 	_bridge_view = null
 	_crowd = null
 	_first_stone = null
+	_markers.clear()
+	_preview = null
+	_arrow = null
+	_controller.set_sites([] as Array[Dictionary])
 	_past_views.clear()
 	_controller.attach(null, _camera.get_camera())
 
@@ -585,9 +625,18 @@ func _build_ui() -> void:
 	_hint.offset_left = 16.0
 	_hint.offset_top = -34.0
 	_hint.offset_bottom = -8.0
-	_hint.offset_right = 900.0
+	_hint.offset_right = 1500.0
 	_hint.modulate = Color(1.0, 1.0, 1.0, 0.75)
 	_refresh_translated_text()
+	_bar = ActionBar.new()
+	game_layer.add_child(_bar)
+	_bar.set_font(_ui_font())
+	_bar.action_requested.connect(_on_action)
+	_bar.speed_requested.connect(_on_speed_requested)
+	_bar.crew_change.connect(_on_crew_change)
+	_tutorial = Tutorial.new()
+	game_layer.add_child(_tutorial)
+	_tutorial.finished.connect(_on_tutorial_finished)
 	_build_menu = BuildMenu.new()
 	game_layer.add_child(_build_menu)
 	_build_menu.option_chosen.connect(_on_build_option)
@@ -689,9 +738,19 @@ func _set_game_ui(on: bool) -> void:
 	_hud.visible = on
 	_speed_label.visible = on
 	_hint.visible = on
+	_bar.visible = on
+	_bar.enabled = on
+	if not on:
+		_bar.hide_crew_panel()
+		_bar.set_banner("")
+		_tutorial.visible = false
+	else:
+		_tutorial.visible = _tutorial.is_active()
 
 
 func _update_speed_label() -> void:
+	if _bar != null:
+		_bar.set_speed_display(_speed)
 	if _speed_label != null:
 		_speed_label.text = tr("UI_HUD_PAUSED") if _speed == 0 else tr("UI_HUD_SPEED") % _speed
 
@@ -705,9 +764,16 @@ func _make_label(parent: Node) -> Label:
 
 
 func _apply_font(c: Control) -> void:
+	var f: Font = _ui_font()
+	if f != null:
+		c.add_theme_font_override("font", f)
+
+
+func _ui_font() -> Font:
 	var locale: Node = get_node_or_null("/root/Locale")
 	if locale != null:
-		c.add_theme_font_override("font", locale.call("font_for", &"ui") as Font)
+		return locale.call("font_for", &"ui") as Font
+	return null
 
 
 func _refresh_translated_text() -> void:
@@ -730,6 +796,8 @@ func _input(event: InputEvent) -> void:
 				_menus.go_back()
 			else:
 				close_pause()
+		elif _bar.is_crew_panel_open():
+			_bar.hide_crew_panel()
 		elif _build_menu.visible:
 			_build_menu.close()
 		elif _controller.mode() == InputController.MODE_IDLE:
@@ -737,26 +805,20 @@ func _input(event: InputEvent) -> void:
 		else:
 			return
 		get_viewport().set_input_as_handled()
-	elif not _menu_paused and _phase == Phase.DAY:
-		match key.keycode:
-			KEY_0:
-				set_speed(0)
-			KEY_1:
-				set_speed(1)
-			KEY_2:
-				set_speed(2)
-			KEY_3:
-				set_speed(3)
 
 
 func _unhandled_input(event: InputEvent) -> void:
 	if _phase != Phase.DAY or _menu_paused or (_dialogue != null and _dialogue.is_playing()):
 		return
 	var mb: InputEventMouseButton = event as InputEventMouseButton
-	if mb != null and mb.pressed and mb.button_index == MOUSE_BUTTON_RIGHT \
-			and _controller.mode() == InputController.MODE_IDLE:
-		_build_menu.visible = true
-		_build_menu.open_at(mb.position)
+	if mb != null and mb.pressed and mb.button_index == MOUSE_BUTTON_RIGHT:
+		if _controller.mode() != InputController.MODE_IDLE:
+			_controller.cancel()
+		elif _bar.is_crew_panel_open():
+			_bar.hide_crew_panel()
+		else:
+			_build_menu.visible = true
+			_build_menu.open_at(mb.position)
 
 
 func _on_time_requested(action: StringName) -> void:
@@ -772,33 +834,329 @@ func _on_time_requested(action: StringName) -> void:
 
 
 func _on_build_option(id: StringName) -> void:
-	if _flow == null or _phase != Phase.DAY:
+	_on_action(id)
+
+
+## An action was chosen from the action bar, a hotkey or the radial menu.
+func _on_action(id: StringName) -> void:
+	if _flow == null or (_phase != Phase.DAY and _phase != Phase.PROLOGUE) or _menu_paused:
 		return
+	if _dialogue != null and _dialogue.is_playing():
+		return
+	_build_menu.close()
+	_bar.hide_crew_panel()
+	_controller.cancel()
+	_current_action = id
 	match id:
 		&"route":
-			for i: int in ROUTE_PRESETS.size():
-				var p: Array = ROUTE_PRESETS[(_preset_route + i) % ROUTE_PRESETS.size()] as Array
-				if _flow.pile(str(p[0])) != null and _flow.pile(str(p[1])) != null:
-					_preset_route = (_preset_route + i + 1) % ROUTE_PRESETS.size()
-					_route_n += 1
-					_controller.begin_route("hr%d" % _route_n, str(p[0]), str(p[1]), str(p[2]), 20)
-					break
+			_controller.begin_link()
 		&"crews":
-			for i: int in CREW_PRESETS.size():
-				var p: Array = CREW_PRESETS[(_preset_crew + i) % CREW_PRESETS.size()] as Array
-				if _flow.pile(str(p[1])) != null:
-					_preset_crew = (_preset_crew + i + 1) % CREW_PRESETS.size()
-					_controller.request_assign_crews(str(p[0]), str(p[1]), 1)
-					break
+			_controller.begin_pick()
 		&"lekhan":
 			_controller.begin_station("lekhan")
-		&"gong":
-			_controller.select_gong("1")
-			_controller.request_ring_gong("1")
+		&"shelter":
+			_controller.begin_station("shelter")
 		&"measuring_line":
 			_controller.begin_measure()
+		&"gong":
+			_current_action = &""
+			_controller.select_gong("1")
+			_controller.request_ring_gong("1")
 		&"chant":
+			_current_action = &""
 			_controller.request_chant()
+		_:
+			_current_action = &""
+	_update_banner()
+
+
+func _on_speed_requested(n: int) -> void:
+	if _flow == null:
+		return
+	if n == 0:
+		toggle_pause()
+	else:
+		set_speed(n)
+
+
+func _on_mode_changed(mode: String) -> void:
+	if mode == InputController.MODE_IDLE:
+		_current_action = &""
+	_update_banner()
+
+
+func _on_link_started(_from_id: String) -> void:
+	_update_banner()
+
+
+func _on_site_picked(site_id: String, screen: Vector2) -> void:
+	_open_crew_panel(site_id, screen)
+
+
+func _on_command(cmd: Dictionary, accepted: bool) -> void:
+	_tutorial.note_command(cmd, accepted)
+	var args: Dictionary = cmd.get("args", {}) as Dictionary
+	match str(cmd.get("type", "")):
+		"draw_route":
+			if accepted:
+				_bar.show_toast(tr("UI_TOAST_ROUTE_OK"))
+			elif _flow != null and _flow.crews.free_crews() < ceili(float(InputController.LINK_HAULERS) / float(DayFlow.HAULERS_PER_CREW)):
+				_bar.show_toast(tr("UI_TOAST_NO_FREE"))
+			else:
+				_bar.show_toast(tr("UI_TOAST_FAIL"))
+		"build_station":
+			if accepted:
+				_station_n += 1
+				var kind: String = str(args.get("kind", ""))
+				var at: Array = args.get("pos", [0.0, 0.0]) as Array
+				var site: Dictionary = {
+					"id": "%s_%d" % [kind, _station_n], "role": str(ROLE_BY_STATION.get(kind, "")),
+					"pos": Vector2(_to_f(at[0]), _to_f(at[1])),
+				}
+				_controller.add_site(site)
+				_add_marker(site)
+				_bar.show_toast(tr("UI_TOAST_STATION_OK"))
+			elif str(args.get("kind", "")) == "shelter":
+				_bar.show_toast(tr("UI_TOAST_SHELTER"))
+			else:
+				_bar.show_toast(tr("UI_TOAST_FAIL"))
+		"place_measuring_line":
+			_bar.show_toast(tr("UI_TOAST_MEASURE_OK"))
+		"chant_jaya":
+			_bar.show_toast(tr("UI_TOAST_CHANT_OK") if accepted else tr("UI_TOAST_CHANT_WAIT"))
+		"ring_gong":
+			_bar.show_toast(tr("UI_TOAST_GONG_OK") if accepted else tr("UI_TOAST_GONG_FAIL"))
+	_tutorial_update()
+
+
+func _site_title(id: String) -> String:
+	var base: String = id.get_slice("_", 0).to_upper()
+	var key: String = "UI_SITE_" + base
+	var text: String = tr(key)
+	return id if text == key else text
+
+
+func _open_crew_panel(site_id: String, screen: Vector2) -> void:
+	if _flow == null:
+		return
+	var role: String = _controller.site_role(site_id)
+	if role == "":
+		return
+	_bar.show_crew_panel(site_id, _site_title(site_id), role, _flow.crews.crews_at(StringName(site_id)),
+		_flow.crews.free_crews(), screen)
+
+
+func _on_crew_change(site_id: String, role: String, delta: int) -> void:
+	if _flow == null:
+		return
+	var ok: bool = true
+	if delta > 0:
+		if _flow.crews.free_crews() <= 0:
+			_bar.show_toast(tr("UI_TOAST_NO_FREE"))
+			ok = false
+		else:
+			ok = _controller.request_assign_crews(role, site_id, 1)
+			if not ok:
+				_bar.show_toast(tr("UI_TOAST_ASSIGN_FAIL"))
+	else:
+		# The command set has no recorded "remove crew" command, so presentation must not edit crews.
+		return
+	if ok and _phase == Phase.PROLOGUE and _speed == 0 and delta > 0:
+		_prompt.visible = false
+		_prompt_button.visible = false
+		set_speed(PROLOGUE_SPEED)
+	_open_crew_panel(site_id, _bar.get_viewport_rect().get_center())
+
+
+func _on_tutorial_finished(completed: bool) -> void:
+	var last: bool = _tutorial.sequence() == Tutorial.SEQ_DAY
+	if not completed or last:
+		_tutorial_run = false
+	_bar.set_highlight(&"")
+	if completed and last:
+		_bar.show_toast(tr("TUT_DONE"))
+	_update_banner()
+
+
+func _tutorial_update() -> void:
+	if _tutorial == null or _flow == null or (_phase != Phase.DAY and _phase != Phase.PROLOGUE):
+		return
+	_tutorial.evaluate(_flow, _speed)
+	var step: Dictionary = _tutorial.current_step()
+	_bar.set_highlight(StringName(str(step.get("button", ""))))
+
+
+func _update_banner() -> void:
+	var mode: String = _controller.mode()
+	var text: String = ""
+	match mode:
+		InputController.MODE_LINK:
+			text = tr("UI_BANNER_ROUTE_1") if _controller.link_from() == "" else tr("UI_BANNER_ROUTE_2")
+		InputController.MODE_PICK:
+			text = tr("UI_BANNER_CREWS")
+		InputController.MODE_STATION:
+			text = tr("UI_BANNER_STATION")
+		InputController.MODE_MEASURE:
+			text = tr("UI_BANNER_MEASURE")
+	if text != "" and _tutorial.is_active():
+		var step: Dictionary = _tutorial.current_step()
+		if str(step.get("banner", "")) != "" and str(step.get("action", "")) == String(_current_action):
+			text = tr(str(step["banner"]))
+	_bar.set_banner(text)
+	_bar.set_active(_current_action if mode != InputController.MODE_IDLE else &"")
+
+
+# --- site markers, hover glow, preview line, tutorial arrow ----------------------
+
+func _setup_sites(day: Dictionary) -> void:
+	_station_n = 0
+	var sites: Array[Dictionary] = []
+	var has_head: bool = false
+	for p: Variant in day.get("piles", []) as Array:
+		var pd: Dictionary = p as Dictionary
+		var at: Array = pd.get("pos", [0.0, 0.0]) as Array
+		var id: String = str(pd.get("id", ""))
+		has_head = has_head or id == "head"
+		sites.append({"id": id, "role": str(pd.get("role", "")), "pos": Vector2(_to_f(at[0]), _to_f(at[1]))})
+	if not has_head:
+		sites.append({"id": "head", "role": "builder", "pos": Vector2.ZERO})
+	_controller.set_sites(sites)
+	_markers.clear()
+	for site: Dictionary in sites:
+		_add_marker(site)
+	_preview = MeshInstance3D.new()
+	var box: BoxMesh = BoxMesh.new()
+	box.size = Vector3(1.0, 0.25, 0.7)
+	_preview.mesh = box
+	_preview.material_override = _glow_material(Color(1.0, 0.85, 0.35, 0.8))
+	_preview.visible = false
+	_stage.add_child(_preview)
+	_arrow = MeshInstance3D.new()
+	var cone: CylinderMesh = CylinderMesh.new()
+	cone.top_radius = 0.0
+	cone.bottom_radius = 1.8
+	cone.height = 3.6
+	_arrow.mesh = cone
+	_arrow.rotation = Vector3(PI, 0.0, 0.0)
+	_arrow.material_override = _glow_material(Color(1.0, 0.8, 0.2, 0.95))
+	_arrow.visible = false
+	_stage.add_child(_arrow)
+
+
+func _glow_material(color: Color) -> StandardMaterial3D:
+	var m: StandardMaterial3D = StandardMaterial3D.new()
+	m.shading_mode = BaseMaterial3D.SHADING_MODE_UNSHADED
+	m.transparency = BaseMaterial3D.TRANSPARENCY_ALPHA
+	m.no_depth_test = true
+	m.albedo_color = color
+	return m
+
+
+func _add_marker(site: Dictionary) -> void:
+	var id: String = str(site["id"])
+	if _markers.has(id) or _stage == null:
+		return
+	var ring: MeshInstance3D = MeshInstance3D.new()
+	var torus: TorusMesh = TorusMesh.new()
+	torus.inner_radius = MARKER_RADIUS - 0.5
+	torus.outer_radius = MARKER_RADIUS + 0.5
+	torus.rings = 32
+	torus.ring_segments = 6
+	ring.mesh = torus
+	ring.material_override = _glow_material(Color(1.0, 0.85, 0.35, 0.0))
+	var pos: Vector2 = site["pos"] as Vector2
+	ring.position = Vector3(pos.x, 0.3, pos.y)
+	ring.visible = false
+	_stage.add_child(ring)
+	_markers[id] = ring
+
+
+func _hovered_site() -> String:
+	if _flow == null or _controller == null:
+		return ""
+	return _controller.site_at(_controller.pick_ground(get_viewport().get_mouse_position()))
+
+
+func _update_overlay() -> void:
+	if _markers.is_empty() or _flow == null or (_phase != Phase.DAY and _phase != Phase.PROLOGUE):
+		return
+	var mode: String = _controller.mode()
+	var hover: String = _hovered_site()
+	var from_id: String = _controller.link_from()
+	var step: Dictionary = _tutorial.current_step()
+	var target: String = str(step.get("site", ""))
+	var pulse: float = 0.5 + 0.5 * sin(_pulse_t * 5.0)
+	for id: String in _markers.keys():
+		var ring: MeshInstance3D = _markers[id] as MeshInstance3D
+		var a: float = 0.0
+		if mode == InputController.MODE_PICK:
+			a = 0.35
+		elif mode == InputController.MODE_LINK:
+			if from_id == "" and _controller.can_start_route(id):
+				a = 0.35
+			elif from_id != "" and id != from_id:
+				a = 0.35
+		if id == from_id and from_id != "":
+			a = 0.9
+		if id == hover:
+			a = maxf(a, 0.8)
+		if id == target:
+			a = maxf(a, 0.45 + 0.45 * pulse)
+		ring.visible = a > 0.01
+		var mat: StandardMaterial3D = ring.material_override as StandardMaterial3D
+		mat.albedo_color = Color(1.0, 0.85, 0.35, a)
+		var s: float = 1.0 + (0.08 * pulse if id == hover or id == target else 0.0)
+		ring.scale = Vector3(s, 1.0, s)
+	if target != "" and _markers.has(target) and _tutorial.is_active():
+		var at: Vector3 = (_markers[target] as MeshInstance3D).position
+		_arrow.visible = true
+		_arrow.position = Vector3(at.x, 5.0 + 1.5 * pulse, at.z)
+	else:
+		_arrow.visible = false
+	_preview.visible = false
+	if mode == InputController.MODE_LINK and from_id != "":
+		var a2: Vector2 = _controller.site_position(from_id)
+		var b2: Vector2 = _controller.pick_ground(get_viewport().get_mouse_position())
+		if hover != "":
+			b2 = _controller.site_position(hover)
+		if not (is_inf(b2.x) or is_inf(b2.y)):
+			var d: Vector2 = b2 - a2
+			if d.length() > 0.5:
+				_preview.visible = true
+				_preview.position = Vector3((a2.x + b2.x) * 0.5, 0.6, (a2.y + b2.y) * 0.5)
+				_preview.rotation = Vector3(0.0, atan2(-d.y, d.x), 0.0)
+				_preview.scale = Vector3(d.length(), 1.0, 1.0)
+
+
+## Frames every site on screen, clear of the HUD, the tutorial panel and the action bar.
+func _frame_sites() -> void:
+	var sites: Array[Dictionary] = _controller.sites()
+	if sites.is_empty() or not _camera.is_inside_tree():
+		return
+	var view: Vector2 = get_viewport().get_visible_rect().size
+	var right: Vector3 = _camera.ground_right()
+	var fwd: Vector3 = _camera.ground_forward()
+	var lo: Vector2 = Vector2(INF, INF)
+	var hi: Vector2 = Vector2(-INF, -INF)
+	for s: Dictionary in sites:
+		var p: Vector2 = s["pos"] as Vector2
+		var w: Vector3 = Vector3(p.x, 0.0, p.y)
+		var uv: Vector2 = Vector2(w.dot(right), w.dot(fwd))
+		lo = Vector2(minf(lo.x, uv.x), minf(lo.y, uv.y))
+		hi = Vector2(maxf(hi.x, uv.x), maxf(hi.y, uv.y))
+	var pad: float = MARKER_RADIUS + 6.0
+	var usable: Rect2 = Rect2(Vector2(view.x * 0.21, view.y * 0.08), Vector2(view.x * 0.77, view.y * 0.6))
+	var ext_u: float = hi.x - lo.x + 2.0 * pad
+	var ext_v: float = (hi.y - lo.y) * RtsCamera.PITCH_SIN + 2.0 * pad
+	var ppm: float = minf(usable.size.x / ext_u, usable.size.y / ext_v)
+	var size: float = clampf(view.y / maxf(ppm, 0.001), RtsCamera.ORTHO_MIN, RtsCamera.ORTHO_MAX)
+	ppm = view.y / size
+	var centre: Vector2 = (lo + hi) * 0.5
+	var off: Vector2 = usable.get_center() - view * 0.5
+	var focus: Vector3 = right * (centre.x - off.x / ppm) + fwd * (centre.y + off.y / (ppm * RtsCamera.PITCH_SIN))
+	_camera.set_ortho_size(size)
+	_camera.position = Vector3(focus.x, 0.0, focus.z)
+	_camera.focus_on(focus)
 
 
 func _on_quit() -> void:
@@ -850,3 +1208,9 @@ static func _read_json(path: String) -> Dictionary:
 	if parsed is Dictionary:
 		return parsed as Dictionary
 	return {}
+
+
+static func _to_f(v: Variant) -> float:
+	if v is float or v is int:
+		return v as float
+	return str(v).to_float()
