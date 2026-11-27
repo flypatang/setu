@@ -17,7 +17,10 @@ signal shloka_started(shloka_id: StringName)
 const ENTRY_CACHE_DIR: String = "user://dialogue_entries/"
 const SPEAKER_KEY_PREFIX: String = "SPK_"
 const DEFAULT_CHARS_PER_SECOND: float = 30.0
-const PANEL_HEIGHT: float = 200.0
+const SPEAKER_FONT_SIZE: int = 28
+const TEXT_FONT_SIZE: int = 32
+const SCREEN_MARGIN: float = 64.0
+const PANEL_HEIGHT: float = 230.0
 const PANEL_COLOR: Color = Color(0.08, 0.06, 0.05, 0.9)
 const PANEL_MARGIN: float = 24.0
 const ZWJ: int = 0x200D
@@ -274,6 +277,12 @@ func _build() -> void:
 	_panel.add_theme_stylebox_override("panel", style)
 	_panel.set_anchors_and_offsets_preset(Control.PRESET_BOTTOM_WIDE)
 	_panel.custom_minimum_size = Vector2(0.0, PANEL_HEIGHT)
+	# Grow UP from the bottom edge (the default downward growth drew the box off-screen; Hanumaan bug 2026-11-27).
+	_panel.grow_vertical = Control.GROW_DIRECTION_BEGIN
+	_panel.offset_left = SCREEN_MARGIN * 3.0
+	_panel.offset_right = -SCREEN_MARGIN * 3.0
+	_panel.offset_bottom = -SCREEN_MARGIN - 110.0  # above Setu's action bar
+	_panel.offset_top = -SCREEN_MARGIN - 110.0 - PANEL_HEIGHT
 	add_child(_panel)
 
 	var column: VBoxContainer = VBoxContainer.new()
@@ -283,11 +292,13 @@ func _build() -> void:
 	_speaker_label = Label.new()
 	_speaker_label.add_theme_font_override("font", ShlokaCard.locale_font(self, &"ui"))
 	_speaker_label.add_theme_color_override("font_color", Palette.GOLD)
+	_speaker_label.add_theme_font_size_override("font_size", SPEAKER_FONT_SIZE)
 	column.add_child(_speaker_label)
 
 	_text_label = Label.new()
 	_text_label.add_theme_font_override("font", ShlokaCard.locale_font(self, &"ui"))
 	_text_label.add_theme_color_override("font_color", Palette.MOON)
+	_text_label.add_theme_font_size_override("font_size", TEXT_FONT_SIZE)
 	_text_label.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	_text_label.size_flags_vertical = Control.SIZE_EXPAND_FILL
 	column.add_child(_text_label)
